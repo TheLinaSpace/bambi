@@ -1,10 +1,12 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import './SetGoal.css'
 
 const illustration = '/assets/bambi-illustration.png'
 
-export default function SetGoal({ onNext }: { onNext: () => void }) {
+export default function SetGoal() {
   const [goal, setGoal] = useState('')
+  const navigate = useNavigate()
 
   const hasGoal = goal.trim().length > 0
 
@@ -41,7 +43,7 @@ export default function SetGoal({ onNext }: { onNext: () => void }) {
       <button
         className={`goal-select-button${hasGoal ? ' active' : ''}`}
         disabled={!hasGoal}
-        onClick={onNext}
+        onClick={() => navigate('/rules')}
       >
         Select
       </button>

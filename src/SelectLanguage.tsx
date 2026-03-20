@@ -1,12 +1,14 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import './SelectLanguage.css'
 
 const illustration = '/assets/bambi-illustration.png'
 
 const languages = ['Arabic', 'English', 'German', 'Japanese', 'Spanish']
 
-export default function SelectLanguage({ onNext }: { onNext: () => void }) {
+export default function SelectLanguage() {
   const [selected, setSelected] = useState<string | null>(null)
+  const navigate = useNavigate()
 
   return (
     <div className="select-language-page">
@@ -36,7 +38,7 @@ export default function SelectLanguage({ onNext }: { onNext: () => void }) {
       <button
         className={`select-button${selected ? ' active' : ''}`}
         disabled={!selected}
-        onClick={onNext}
+        onClick={() => navigate('/set-goal')}
       >
         Select
       </button>

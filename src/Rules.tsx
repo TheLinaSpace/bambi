@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom'
 import './Rules.css'
 
 const steps = [
@@ -8,7 +9,9 @@ const steps = [
   "Don't kill Bambi",
 ]
 
-export default function Rules({ onNext }: { onNext: () => void }) {
+export default function Rules() {
+  const navigate = useNavigate()
+
   return (
     <div className="rules-page">
       <h1 className="rules-title">How Bambi works:</h1>
@@ -22,7 +25,7 @@ export default function Rules({ onNext }: { onNext: () => void }) {
         ))}
       </div>
 
-      <button className="ready-button" onClick={onNext}>Ready?</button>
+      <button className="ready-button" onClick={() => navigate('/lets-go')}>Ready?</button>
     </div>
   )
 }
