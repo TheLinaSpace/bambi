@@ -1,0 +1,30 @@
+@font-face {
+  font-family: 'Cheeky Rabbit';
+  src: url('/fonts/CheekyRabbit.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #fffbeb;
+  font-family: 'Cheeky Rabbit', 'Comic Sans MS', cursive, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  width: 100%;
+  max-width: 430px;
+  margin: 0 auto;
+  min-height: 100svh;
+  position: relative;
+  overflow: hidden;
+}
