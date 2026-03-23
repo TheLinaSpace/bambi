@@ -5,6 +5,7 @@ import SelectLanguage from './SelectLanguage'
 import SetGoal from './SetGoal'
 import Rules from './Rules'
 import LetsGo from './LetsGo'
+import Day from './Day'
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
       <Route path="/set-goal" element={<SetGoal />} />
       <Route path="/rules" element={<Rules />} />
       <Route path="/lets-go" element={<LetsGo />} />
+      <Route path="/day" element={<Day />} />
     </Routes>
   )
 }

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './SetGoal.css'
 
-const illustration = '/assets/bambi-illustration.png'
+const bambiSuggest = '/assets/bambi-suggest.png'
 
 export default function SetGoal() {
   const [goal, setGoal] = useState('')
@@ -24,26 +24,16 @@ export default function SetGoal() {
       />
 
       <div className="goal-character-area">
-        <div className="goal-illustration">
-          <div className="goal-illustration-inner">
-            <img alt="" src={illustration} />
-          </div>
-        </div>
-
-        <img className="bubble-dot bubble-dot-1" alt="" src="/assets/bubble-dot-1.svg" />
-        <img className="bubble-dot bubble-dot-2" alt="" src="/assets/bubble-dot-2.svg" />
-        <img className="bubble-dot bubble-dot-3" alt="" src="/assets/bubble-dot-3.svg" />
-
-        <div className="thought-bubble">
-          <img alt="" src="/assets/thought-bubble.svg" />
-          <span className="thought-bubble-text">Suggested: start with 7 words per day</span>
-        </div>
+        <img className="goal-suggest-illustration" alt="" src={bambiSuggest} />
       </div>
 
       <button
         className={`goal-select-button${hasGoal ? ' active' : ''}`}
         disabled={!hasGoal}
-        onClick={() => navigate('/rules')}
+        onClick={() => {
+          localStorage.setItem('dailyGoal', goal.trim())
+          navigate('/rules')
+        }}
       >
         Select
       </button>

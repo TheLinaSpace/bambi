@@ -6,13 +6,13 @@
   overflow: hidden;
 }
 
-/* Bottom illustration - main character */
+/* Bottom illustration - main character sitting */
 .illustration-bottom {
   position: absolute;
-  left: -64px;
-  top: 37px;
-  width: 437px;
-  height: 879px;
+  left: -155px;
+  bottom: 0;
+  width: 617px;
+  height: 331px;
   overflow: hidden;
   pointer-events: none;
 }
@@ -21,18 +21,18 @@
   position: absolute;
   top: 0;
   left: 0;
-  width: 126%;
-  height: 100%;
-  object-fit: cover;
+  width: 139.71%;
+  height: 260.42%;
+  max-width: none;
 }
 
-/* Top-left illustration - flipped/rotated */
+/* Top illustration - paws hanging down */
 .illustration-top {
   position: absolute;
-  left: 0;
-  top: -90px;
-  width: 226px;
-  height: 283px;
+  left: 35px;
+  top: -82px;
+  width: 331px;
+  height: 271px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -40,19 +40,20 @@
 }
 
 .illustration-top-inner {
-  transform: scaleY(-1) rotate(180deg);
-  width: 226px;
-  height: 283px;
+  transform: rotate(180deg);
+  width: 331px;
+  height: 271px;
   overflow: hidden;
   position: relative;
 }
 
 .illustration-top-inner img {
   position: absolute;
-  top: 0;
-  left: -144%;
-  width: 244%;
-  height: 311%;
+  top: -107.71%;
+  left: -55.34%;
+  width: 169.68%;
+  height: 207.71%;
+  max-width: none;
 }
 
 /* Title */

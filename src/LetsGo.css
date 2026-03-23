@@ -4,51 +4,49 @@
   height: 100svh;
   background: #fffbeb;
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
 }
 
-/* Character illustration */
+/* Character illustration - bambi on laptop */
 .letsgo-illustration {
-  width: 600px;
-  height: 500px;
-  position: relative;
-  pointer-events: none;
-  margin-top: 40px;
-}
-
-.letsgo-illustration-inner {
-  width: 480px;
-  height: 600px;
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) rotate(88.79deg) scaleY(-1);
+  left: -11px;
+  top: 252px;
+  width: 428px;
+  height: 252px;
   overflow: hidden;
+  pointer-events: none;
 }
 
-.letsgo-illustration-inner img {
+.letsgo-illustration img {
   position: absolute;
-  top: 0;
-  left: -144%;
-  width: 244%;
-  height: 311%;
+  top: -105.05%;
+  left: 0;
+  width: 135.41%;
+  height: 229.82%;
+  max-width: none;
+}
+
+/* Scrollable text container */
+.letsgo-text-container {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 520px;
+  bottom: 0;
+  overflow: hidden;
 }
 
 /* LET'S GO text */
 .letsgo-text {
-  font-family: 'Graffiti', 'Impact', sans-serif;
+  padding: 0 37px;
+  font-family: 'Cheeky Rabbit', 'Comic Sans MS', cursive, sans-serif;
   font-size: 48px;
   font-weight: normal;
   font-style: normal;
-  color: #ff5151;
-  line-height: 1.1;
-  margin-top: 40px;
-  padding-left: 100px;
-  align-self: flex-start;
-  white-space: nowrap;
+  color: #020202;
+  line-height: 1;
+  word-break: break-all;
+  margin: 0;
 }
 
 .letsgo-text span {

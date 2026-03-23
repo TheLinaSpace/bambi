@@ -1,0 +1,450 @@
+.day-page {
+  position: relative;
+  width: 100%;
+  min-height: 100svh;
+  background: #fffbeb;
+  overflow: hidden;
+  padding: 0 30px;
+  box-sizing: border-box;
+}
+
+/* Top bar */
+.day-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 0 0;
+}
+
+.day-menu-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+}
+
+.day-menu-btn img {
+  width: 100%;
+  height: 100%;
+}
+
+.day-flag {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.day-lives {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.day-lives img {
+  width: 48px;
+  height: 32px;
+}
+
+.day-lives span {
+  font-family: 'Cheeky Rabbit', 'Comic Sans MS', cursive, sans-serif;
+  font-size: 24px;
+  color: #252525;
+  text-align: center;
+}
+
+/* Day title */
+.day-title {
+  font-family: 'Cheeky Rabbit', 'Comic Sans MS', cursive, sans-serif;
+  font-size: 48px;
+  font-weight: normal;
+  color: #000;
+  text-align: center;
+  margin: 16px 0 0;
+  line-height: 1;
+}
+
+/* Date */
+.day-date {
+  font-family: 'Cheeky Rabbit', 'Comic Sans MS', cursive, sans-serif;
+  font-size: 24px;
+  font-weight: normal;
+  color: #737373;
+  text-align: center;
+  margin: 8px 0 0;
+  line-height: 1;
+}
+
+/* Progress bar row */
+.day-progress-row {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  padding: 24px 0 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.day-progress-bar {
+  width: 260px;
+  height: 13px;
+  border: 1px solid #000;
+  border-radius: 16px;
+  box-shadow: 4px 5px 0px 0px #787878;
+  overflow: hidden;
+}
+
+.day-progress-fill {
+  height: 100%;
+  background: #000;
+  border-radius: 16px;
+  transition: width 0.3s ease;
+}
+
+.day-progress-text {
+  font-family: 'Cheeky Rabbit', 'Comic Sans MS', cursive, sans-serif;
+  font-size: 24px;
+  color: #737373;
+  text-align: center;
+}
+
+/* Word cards grid */
+.day-words-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.day-word-card {
+  width: 160px;
+  height: 160px;
+  border: 1px solid #000;
+  border-radius: 16px;
+  box-shadow: 4px 5px 0px 0px #787878;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.day-word-card span {
+  font-family: 'Chilanka', 'Comic Sans MS', cursive, sans-serif;
+  font-size: 20px;
+  color: #000;
+  text-align: center;
+}
+
+/* Empty state */
+.day-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 80px;
+}
+
+.day-illustration {
+  width: 319px;
+  height: 220px;
+  overflow: hidden;
+  position: relative;
+}
+
+.day-illustration img {
+  position: absolute;
+  top: -31.7%;
+  left: -15.65%;
+  width: 222.61%;
+  height: 323.03%;
+  max-width: none;
+}
+
+.day-empty-text {
+  font-family: 'Chilanka', 'Comic Sans MS', cursive, sans-serif;
+  font-size: 16px;
+  color: #000;
+  margin-top: 16px;
+}
+
+/* Action buttons */
+.day-action-buttons {
+  position: fixed;
+  bottom: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 16px;
+}
+
+.day-action-btn {
+  width: 94px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 0;
+  background: #000;
+  border: 1px solid #fff;
+  border-radius: 16px;
+  box-shadow: 2px 2px 0px 0px #787878;
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.day-action-btn img {
+  width: 40px;
+  height: 40px;
+}
+
+.day-action-btn:hover {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0px 0px #787878;
+}
+
+.day-action-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: none;
+}
+
+/* Modal overlay */
+.day-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.33);
+  z-index: 100;
+  display: flex;
+  align-items: flex-end;
+}
+
+/* Modal */
+.day-modal {
+  width: 100%;
+  background: #fffbeb;
+  padding: 48px 48px 40px;
+  box-sizing: border-box;
+}
+
+.day-modal-title {
+  font-family: 'Cheeky Rabbit', 'Comic Sans MS', cursive, sans-serif;
+  font-size: 36px;
+  font-weight: normal;
+  color: #000;
+  text-align: center;
+  margin: 0 0 32px;
+  line-height: 1.1;
+}
+
+.day-modal-input {
+  display: block;
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #000;
+  border-radius: 16px;
+  box-shadow: 4px 5px 0px 0px #787878;
+  font-family: 'Cheeky Rabbit', 'Comic Sans MS', cursive, sans-serif;
+  font-size: 24px;
+  color: #000;
+  background: transparent;
+  box-sizing: border-box;
+  outline: none;
+  margin-bottom: 48px;
+}
+
+.day-modal-input::placeholder {
+  color: #000;
+  opacity: 0.3;
+}
+
+.day-modal-submit {
+  display: block;
+  width: 100%;
+  height: 53px;
+  background: #000;
+  color: #fff9f9;
+  border: 1px solid #fff;
+  border-radius: 16px;
+  box-shadow: 2px 2px 0px 0px #787878;
+  font-family: 'Cheeky Rabbit', 'Comic Sans MS', cursive, sans-serif;
+  font-size: 36px;
+  text-align: center;
+  cursor: pointer;
+  margin-bottom: 16px;
+}
+
+.day-modal-submit:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.day-modal-cancel {
+  display: block;
+  width: 100%;
+  height: 53px;
+  background: transparent;
+  color: #000;
+  border: 1px solid #000;
+  border-radius: 16px;
+  box-shadow: 2px 2px 0px 0px #787878;
+  font-family: 'Cheeky Rabbit', 'Comic Sans MS', cursive, sans-serif;
+  font-size: 36px;
+  text-align: center;
+  cursor: pointer;
+}
+
+/* Word detail modal */
+.word-detail-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.43);
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.word-detail-modal {
+  display: flex;
+  flex-direction: column;
+  max-height: 85vh;
+}
+
+.word-detail-header {
+  background: #d8c5fd;
+  border: 1px solid #d8c5fd;
+  border-radius: 16px 16px 0 0;
+  padding: 32px 24px 16px;
+  box-shadow: 4px 5px 0px 0px #787878;
+}
+
+.word-detail-word {
+  font-family: 'Chilanka', 'Comic Sans MS', cursive, sans-serif;
+  font-size: 30px;
+  font-weight: normal;
+  color: #000;
+  text-align: center;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.word-detail-body {
+  background: #000;
+  border: 1px solid #000;
+  border-radius: 16px 16px 0 0;
+  box-shadow: 4px 5px 0px 0px #787878;
+  padding: 32px 24px 24px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.word-detail-translation {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.word-detail-original,
+.word-detail-meaning {
+  font-family: 'Chilanka', 'Comic Sans MS', cursive, sans-serif;
+  font-size: 30px;
+  color: #fff;
+  width: 129px;
+  text-align: center;
+}
+
+.word-detail-equals {
+  font-family: 'Cheeky Rabbit', 'Comic Sans MS', cursive, sans-serif;
+  font-size: 32px;
+  color: #fff;
+}
+
+.word-detail-type {
+  font-family: 'Chilanka', 'Comic Sans MS', cursive, sans-serif;
+  font-size: 20px;
+  color: #ededed;
+  text-align: center;
+  margin: 0 0 20px;
+}
+
+.word-detail-example {
+  font-family: 'Chilanka', 'Comic Sans MS', cursive, sans-serif;
+  font-size: 16px;
+  color: #fff;
+  margin: 0 0 20px;
+}
+
+.word-detail-label {
+  font-size: 20px;
+}
+
+.word-detail-section-title {
+  font-family: 'Chilanka', 'Comic Sans MS', cursive, sans-serif;
+  font-size: 20px;
+  font-weight: normal;
+  color: #fff;
+  margin: 0 0 8px;
+}
+
+.word-detail-conjugation {
+  display: flex;
+  margin-bottom: 20px;
+}
+
+.word-detail-col {
+  font-family: 'Chilanka', 'Comic Sans MS', cursive, sans-serif;
+  font-size: 16px;
+  color: #fff;
+}
+
+.word-detail-col:nth-child(1) {
+  width: 122px;
+}
+
+.word-detail-col:nth-child(2) {
+  width: 88px;
+}
+
+.word-detail-col:nth-child(3) {
+  width: 78px;
+}
+
+.word-detail-col p {
+  margin: 0;
+  padding: 4px 0;
+}
+
+.word-detail-prepositions {
+  font-family: 'Chilanka', 'Comic Sans MS', cursive, sans-serif;
+  font-size: 16px;
+  color: #fff;
+}
+
+.word-detail-prepositions p {
+  margin: 0 0 10px;
+  line-height: 1.4;
+}
+
+.word-detail-prepositions .prep-name {
+  color: #d8c5fd;
+}
+
+.word-detail-prepositions ol {
+  margin: 0;
+  padding: 0;
+  list-style-position: inside;
+}
+
+.word-detail-prepositions li {
+  margin-left: 24px;
+  margin-bottom: 10px;
+}
+
+.word-detail-loading {
+  font-family: 'Chilanka', 'Comic Sans MS', cursive, sans-serif;
+  font-size: 20px;
+  color: #fff;
+  text-align: center;
+  padding: 40px 0;
+  margin: 0;
+}

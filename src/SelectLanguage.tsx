@@ -38,7 +38,10 @@ export default function SelectLanguage() {
       <button
         className={`select-button${selected ? ' active' : ''}`}
         disabled={!selected}
-        onClick={() => navigate('/set-goal')}
+        onClick={() => {
+          if (selected) localStorage.setItem('selectedLanguage', selected)
+          navigate('/set-goal')
+        }}
       >
         Select
       </button>

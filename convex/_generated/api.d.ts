@@ -8,13 +8,19 @@
  * @module
  */
 
+import type * as wordActions from "../wordActions.js";
+import type * as words from "../words.js";
+
 import type {
   ApiFromModules,
   FilterApi,
   FunctionReference,
 } from "convex/server";
 
-declare const fullApi: ApiFromModules<{}>;
+declare const fullApi: ApiFromModules<{
+  wordActions: typeof wordActions;
+  words: typeof words;
+}>;
 
 /**
  * A utility for referencing Convex functions in your app's public API.

@@ -20,4 +20,29 @@ export default defineSchema({
     completed: v.boolean(),
     score: v.optional(v.number()),
   }),
+  words: defineTable({
+    word: v.string(),
+    language: v.string(),
+    translation: v.string(),
+    type: v.string(),
+    example: v.string(),
+    conjugation: v.optional(
+      v.array(
+        v.object({
+          pronoun: v.string(),
+          present: v.string(),
+          past: v.string(),
+        })
+      )
+    ),
+    prepositions: v.optional(
+      v.array(
+        v.object({
+          name: v.string(),
+          explanation: v.string(),
+          example: v.string(),
+        })
+      )
+    ),
+  }).index("by_word_and_language", ["word", "language"]),
 });
