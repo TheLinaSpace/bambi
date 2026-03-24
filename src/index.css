@@ -28,3 +28,8 @@ body {
   position: relative;
   overflow: hidden;
 }
+
+/* Ensure modals/overlays can escape the max-width container */
+html {
+  overflow-x: hidden;
+}

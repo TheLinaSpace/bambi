@@ -4,7 +4,7 @@
   min-height: 100svh;
   background: #fffbeb;
   overflow: hidden;
-  padding: 0 30px;
+  padding: 0 24px;
   box-sizing: border-box;
 }
 
@@ -57,7 +57,7 @@
 /* Day title */
 .day-title {
   font-family: 'Cheeky Rabbit', 'Comic Sans MS', cursive, sans-serif;
-  font-size: 48px;
+  font-size: clamp(36px, 12vw, 48px);
   font-weight: normal;
   color: #000;
   text-align: center;
@@ -80,14 +80,14 @@
 .day-progress-row {
   display: flex;
   align-items: center;
-  gap: 32px;
+  gap: 16px;
   padding: 24px 0 0;
   width: 100%;
   box-sizing: border-box;
 }
 
 .day-progress-bar {
-  width: 260px;
+  flex: 1;
   height: 13px;
   border: 1px solid #000;
   border-radius: 16px;
@@ -107,19 +107,20 @@
   font-size: 24px;
   color: #737373;
   text-align: center;
+  white-space: nowrap;
 }
 
 /* Word cards grid */
 .day-words-grid {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 16px;
   margin-top: 24px;
+  padding-bottom: 160px;
 }
 
 .day-word-card {
-  width: 160px;
-  height: 160px;
+  aspect-ratio: 1;
   border: 1px solid #000;
   border-radius: 16px;
   box-shadow: 4px 5px 0px 0px #787878;
@@ -134,6 +135,8 @@
   font-size: 20px;
   color: #000;
   text-align: center;
+  padding: 8px;
+  word-break: break-word;
 }
 
 /* Empty state */
@@ -145,7 +148,7 @@
 }
 
 .day-illustration {
-  width: 319px;
+  width: min(319px, 85%);
   height: 220px;
   overflow: hidden;
   position: relative;
@@ -178,7 +181,7 @@
 }
 
 .day-action-btn {
-  width: 94px;
+  width: min(94px, 22vw);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -219,14 +222,16 @@
 /* Modal */
 .day-modal {
   width: 100%;
+  max-width: 430px;
+  margin: 0 auto;
   background: #fffbeb;
-  padding: 48px 48px 40px;
+  padding: 48px 24px 40px;
   box-sizing: border-box;
 }
 
 .day-modal-title {
   font-family: 'Cheeky Rabbit', 'Comic Sans MS', cursive, sans-serif;
-  font-size: 36px;
+  font-size: clamp(28px, 9vw, 36px);
   font-weight: normal;
   color: #000;
   text-align: center;
@@ -306,6 +311,9 @@
   display: flex;
   flex-direction: column;
   max-height: 85vh;
+  max-width: 430px;
+  width: 100%;
+  margin: 0 auto;
 }
 
 .word-detail-header {
@@ -318,7 +326,7 @@
 
 .word-detail-word {
   font-family: 'Chilanka', 'Comic Sans MS', cursive, sans-serif;
-  font-size: 30px;
+  font-size: clamp(24px, 8vw, 30px);
   font-weight: normal;
   color: #000;
   text-align: center;
@@ -342,14 +350,14 @@
   justify-content: center;
   gap: 10px;
   margin-bottom: 4px;
+  flex-wrap: wrap;
 }
 
 .word-detail-original,
 .word-detail-meaning {
   font-family: 'Chilanka', 'Comic Sans MS', cursive, sans-serif;
-  font-size: 30px;
+  font-size: clamp(22px, 7vw, 30px);
   color: #fff;
-  width: 129px;
   text-align: center;
 }
 
@@ -372,6 +380,7 @@
   font-size: 16px;
   color: #fff;
   margin: 0 0 20px;
+  word-break: break-word;
 }
 
 .word-detail-label {
@@ -389,24 +398,26 @@
 .word-detail-conjugation {
   display: flex;
   margin-bottom: 20px;
+  overflow-x: auto;
 }
 
 .word-detail-col {
   font-family: 'Chilanka', 'Comic Sans MS', cursive, sans-serif;
   font-size: 16px;
   color: #fff;
+  flex-shrink: 0;
 }
 
 .word-detail-col:nth-child(1) {
-  width: 122px;
+  width: 42%;
 }
 
 .word-detail-col:nth-child(2) {
-  width: 88px;
+  width: 30%;
 }
 
 .word-detail-col:nth-child(3) {
-  width: 78px;
+  width: 28%;
 }
 
 .word-detail-col p {
@@ -436,8 +447,9 @@
 }
 
 .word-detail-prepositions li {
-  margin-left: 24px;
+  margin-left: 16px;
   margin-bottom: 10px;
+  word-break: break-word;
 }
 
 .word-detail-loading {

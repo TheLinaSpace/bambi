@@ -7,12 +7,14 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding: 0 24px;
+  box-sizing: border-box;
 }
 
 /* Title */
 .goal-title {
   font-family: 'Cheeky Rabbit', 'Comic Sans MS', cursive, sans-serif;
-  font-size: 48px;
+  font-size: clamp(36px, 12vw, 48px);
   font-weight: normal;
   font-style: normal;
   color: #000;
@@ -28,12 +30,14 @@
   color: #000;
   text-align: center;
   margin-top: 8px;
-  width: 306px;
+  width: 100%;
+  max-width: 306px;
 }
 
 /* Input field */
 .goal-input {
-  width: 306px;
+  width: 100%;
+  max-width: 306px;
   padding: 12px 20px;
   border: 1px solid #000;
   border-radius: 16px;
@@ -64,17 +68,18 @@
 /* Combined suggestion illustration (character + thought bubble) */
 .goal-suggest-illustration {
   position: absolute;
-  left: 22px;
+  left: 0;
   top: 80px;
-  width: 332px;
-  height: 296px;
+  width: min(332px, 85%);
+  height: auto;
+  aspect-ratio: 332 / 296;
   object-fit: cover;
   pointer-events: none;
 }
 
 /* Select button */
 .goal-select-button {
-  width: 246px;
+  width: min(246px, 70%);
   display: flex;
   align-items: center;
   justify-content: center;
