@@ -19,3 +19,19 @@ export const addWord = mutation({
     return await ctx.db.insert("dailyWords", args);
   },
 });
+
+export const removeWord = mutation({
+  args: { word: v.string(), language: v.string(), date: v.string() },
+  handler: async (ctx, args) => {
+    const entry = await ctx.db
+      .query("dailyWords")
+      .withIndex("by_language_and_date", (q) =>
+        q.eq("language", args.language).eq("date", args.date)
+      )
+      .filter((q) => q.eq(q.field("word"), args.word))
+      .first();
+    if (entry) {
+      await ctx.db.delete(entry._id);
+    }
+  },
+});

@@ -131,6 +131,35 @@
   cursor: pointer;
 }
 
+.day-word-card[draggable="true"] {
+  cursor: grab;
+}
+
+.day-word-card[draggable="true"]:active {
+  cursor: grabbing;
+}
+
+/* Delete drop zone */
+.day-delete-zone {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 24px;
+  background: rgba(220, 38, 38, 0.15);
+  border-top: 2px dashed #dc2626;
+  color: #dc2626;
+  font-family: 'Cheeky Rabbit', 'Comic Sans MS', cursive, sans-serif;
+  font-size: 20px;
+  text-align: center;
+  z-index: 100;
+  transition: background 0.2s ease;
+}
+
+.day-delete-zone.active {
+  background: rgba(220, 38, 38, 0.35);
+}
+
 .day-word-card span {
   font-family: 'Chilanka', 'Comic Sans MS', cursive, sans-serif;
   font-size: 20px;
@@ -396,10 +425,10 @@
   display: flex;
   flex-direction: column;
   max-height: 90vh;
-  max-width: 430px;
+  max-width: 100%;
   width: 100%;
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0;
   box-sizing: border-box;
   animation: slideUp 0.3s ease-out;
 }
@@ -412,7 +441,7 @@
 .word-detail-prev {
   background: #d8c5fd;
   border-radius: 16px 16px 0 0;
-  padding: 20px 24px 36px;
+  padding: 20px 24px;
   cursor: pointer;
   margin-bottom: -16px;
   z-index: 0;
@@ -432,7 +461,6 @@
   text-align: center;
   margin: 0;
   line-height: 1.2;
-  opacity: 0.6;
 }
 
 .word-detail-header {
@@ -482,18 +510,7 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-.word-detail-next {
-  transition: transform 0.1s ease;
-}
-
-.word-detail-next:active {
-  transform: scale(0.97);
-}
-
-.word-detail-prev {
-  transition: transform 0.1s ease;
-}
-
+.word-detail-next:active,
 .word-detail-prev:active {
   transform: scale(0.97);
 }
@@ -619,17 +636,28 @@
 }
 
 .word-detail-next {
-  display: block;
-  width: 100%;
-  margin-top: 24px;
-  padding: 20px 16px;
   background: #d8c5fd;
-  border: none;
-  border-radius: 16px;
+  border-radius: 16px 16px 0 0;
+  padding: 20px 24px;
+  cursor: pointer;
+  margin-top: -16px;
+  z-index: 2;
+  animation: slideNextIn 0.3s ease-out;
+}
+
+@keyframes slideNextIn {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.word-detail-next-text {
   font-family: 'Chilanka', 'Comic Sans MS', cursive, sans-serif;
-  font-size: 24px;
+  font-size: clamp(24px, 8vw, 30px);
+  font-weight: normal;
   color: #000;
   text-align: center;
+  margin: 0;
+  line-height: 1.2;
   cursor: pointer;
 }
 

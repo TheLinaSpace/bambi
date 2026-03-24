@@ -49,6 +49,7 @@ export default function Day() {
   const [showScanModal, setShowScanModal] = useState(false)
   const [scanning, setScanning] = useState(false)
   const cameraInputRef = useRef<HTMLInputElement>(null)
+  const uploadInputRef = useRef<HTMLInputElement>(null)
   const selectedLanguage = localStorage.getItem('selectedLanguage') || 'English'
   const flagSrc = languageFlags[selectedLanguage] || '/assets/flag-gb.png'
   const dailyGoal = localStorage.getItem('dailyGoal') || '8'
@@ -62,7 +63,10 @@ export default function Day() {
 
   const dailyWordsData = useQuery(api.dailyWords.getByDate, { language: selectedLanguage, date: todayStr })
   const addWord = useMutation(api.dailyWords.addWord)
+  const removeWord = useMutation(api.dailyWords.removeWord)
   const words = dailyWordsData?.map((d) => d.word) ?? []
+  const [draggingWord, setDraggingWord] = useState<string | null>(null)
+  const [dropZoneActive, setDropZoneActive] = useState(false)
   const selectedWord = selectedWordIndex !== null ? words[selectedWordIndex] ?? null : null
   const prevWord = selectedWordIndex !== null && selectedWordIndex > 0 ? words[selectedWordIndex - 1] : null
   const nextWord = selectedWordIndex !== null && selectedWordIndex < words.length - 1 ? words[selectedWordIndex + 1] : null
@@ -166,13 +170,49 @@ export default function Day() {
           <p className="day-empty-text">{emptyStateLabels[selectedLanguage] || 'No Words Added Yet!'}</p>
         </div>
       ) : (
-        <div className="day-words-grid">
-          {words.map((w, i) => (
-            <div key={i} className="day-word-card" onClick={() => setSelectedWordIndex(i)}>
-              <span>{w}</span>
+        <>
+          <div className="day-words-grid">
+            {words.map((w, i) => (
+              <div
+                key={i}
+                className="day-word-card"
+                draggable
+                onClick={() => setSelectedWordIndex(i)}
+                onDragStart={(e) => {
+                  setDraggingWord(w)
+                  e.dataTransfer.setData('text/plain', w)
+                }}
+                onDragEnd={() => {
+                  setDraggingWord(null)
+                  setDropZoneActive(false)
+                }}
+              >
+                <span>{w}</span>
+              </div>
+            ))}
+          </div>
+          {draggingWord && (
+            <div
+              className={`day-delete-zone${dropZoneActive ? ' active' : ''}`}
+              onDragOver={(e) => {
+                e.preventDefault()
+                setDropZoneActive(true)
+              }}
+              onDragLeave={() => setDropZoneActive(false)}
+              onDrop={(e) => {
+                e.preventDefault()
+                const w = e.dataTransfer.getData('text/plain')
+                if (w) {
+                  removeWord({ word: w, language: selectedLanguage, date: todayStr })
+                }
+                setDraggingWord(null)
+                setDropZoneActive(false)
+              }}
+            >
+              🗑️ Drop to delete
             </div>
-          ))}
-        </div>
+          )}
+        </>
       )}
 
       <input
@@ -183,12 +223,19 @@ export default function Day() {
         onChange={handleCameraCapture}
         style={{ display: 'none' }}
       />
+      <input
+        ref={uploadInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleCameraCapture}
+        style={{ display: 'none' }}
+      />
 
       <div className="day-action-buttons">
         <button className="day-action-btn" onClick={() => cameraInputRef.current?.click()}>
           <img alt="Camera" src="/assets/icon-camera.png" />
         </button>
-        <button className="day-action-btn">
+        <button className="day-action-btn" onClick={() => uploadInputRef.current?.click()}>
           <img alt="Upload" src="/assets/icon-upload.png" />
         </button>
         <button className="day-action-btn" onClick={() => setShowModal(true)}>
@@ -267,12 +314,12 @@ export default function Day() {
               ) : (
                 <p className="word-detail-loading">Failed to load word details.</p>
               )}
-              {nextWord && (
-                <button className="word-detail-next" onClick={() => { setSlideDirection('up'); setSelectedWordIndex(selectedWordIndex + 1); }}>
-                  {nextWord} →
-                </button>
-              )}
             </div>
+            {nextWord && (
+              <div className="word-detail-next" onClick={() => { setSlideDirection('up'); setSelectedWordIndex(selectedWordIndex + 1); }}>
+                <h2 className="word-detail-next-text">{nextWord}</h2>
+              </div>
+            )}
           </div>
         </div>
       )}
