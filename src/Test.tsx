@@ -12,11 +12,12 @@ interface Question {
 }
 
 const languageFlags: Record<string, string> = {
-  Arabic: '/assets/flag-sa.png',
-  English: '/assets/flag-gb.png',
+  Arabic: '/assets/flag-lb.png',
+
   German: '/assets/flag-de.png',
   Japanese: '/assets/flag-jp.png',
-  Spanish: '/assets/flag-es.png',
+
+  French: '/assets/flag-fr.png',
 }
 
 export default function Test() {

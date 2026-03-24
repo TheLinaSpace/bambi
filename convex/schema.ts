@@ -1,13 +1,9 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
+import { authTables } from "@convex-dev/auth/server";
 
 export default defineSchema({
-  users: defineTable({
-    name: v.string(),
-    email: v.string(),
-    nativeLanguage: v.string(),
-    targetLanguage: v.string(),
-  }),
+  ...authTables,
   lessons: defineTable({
     title: v.string(),
     language: v.string(),
@@ -15,7 +11,7 @@ export default defineSchema({
     content: v.string(),
   }),
   progress: defineTable({
-    userId: v.id("users"),
+    userId: v.string(),
     lessonId: v.id("lessons"),
     completed: v.boolean(),
     score: v.optional(v.number()),
@@ -46,8 +42,9 @@ export default defineSchema({
     ),
   }).index("by_word_and_language", ["word", "language"]),
   dailyWords: defineTable({
+    userId: v.optional(v.string()),
     word: v.string(),
     language: v.string(),
     date: v.string(),
-  }).index("by_language_and_date", ["language", "date"]),
+  }).index("by_user_language_date", ["userId", "language", "date"]),
 });

@@ -4,10 +4,13 @@ import { query, mutation } from "./_generated/server";
 export const getByDate = query({
   args: { language: v.string(), date: v.string() },
   handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return [];
+    const userId = identity.subject;
     return await ctx.db
       .query("dailyWords")
-      .withIndex("by_language_and_date", (q) =>
-        q.eq("language", args.language).eq("date", args.date)
+      .withIndex("by_user_language_date", (q) =>
+        q.eq("userId", userId).eq("language", args.language).eq("date", args.date)
       )
       .collect();
   },
@@ -16,6 +19,9 @@ export const getByDate = query({
 export const getByMonth = query({
   args: { language: v.string(), yearMonth: v.string() },
   handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return [];
+    const userId = identity.subject;
     const [year, month] = args.yearMonth.split("-").map(Number);
     const startDate = `${year}-${String(month).padStart(2, "0")}-01`;
     const nextMonth = month === 12 ? 1 : month + 1;
@@ -23,8 +29,8 @@ export const getByMonth = query({
     const endDate = `${nextYear}-${String(nextMonth).padStart(2, "0")}-01`;
     return await ctx.db
       .query("dailyWords")
-      .withIndex("by_language_and_date", (q) =>
-        q.eq("language", args.language).gte("date", startDate).lt("date", endDate)
+      .withIndex("by_user_language_date", (q) =>
+        q.eq("userId", userId).eq("language", args.language).gte("date", startDate).lt("date", endDate)
       )
       .collect();
   },
@@ -33,17 +39,23 @@ export const getByMonth = query({
 export const addWord = mutation({
   args: { word: v.string(), language: v.string(), date: v.string() },
   handler: async (ctx, args) => {
-    return await ctx.db.insert("dailyWords", args);
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+    const userId = identity.subject;
+    return await ctx.db.insert("dailyWords", { ...args, userId });
   },
 });
 
 export const removeWord = mutation({
   args: { word: v.string(), language: v.string(), date: v.string() },
   handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+    const userId = identity.subject;
     const entry = await ctx.db
       .query("dailyWords")
-      .withIndex("by_language_and_date", (q) =>
-        q.eq("language", args.language).eq("date", args.date)
+      .withIndex("by_user_language_date", (q) =>
+        q.eq("userId", userId).eq("language", args.language).eq("date", args.date)
       )
       .filter((q) => q.eq(q.field("word"), args.word))
       .first();

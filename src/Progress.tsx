@@ -6,11 +6,12 @@ import './Progress.css'
 import { getCatLives } from './lives'
 
 const languageFlags: Record<string, string> = {
-  Arabic: '/assets/flag-sa.png',
-  English: '/assets/flag-gb.png',
+  Arabic: '/assets/flag-lb.png',
+
   German: '/assets/flag-de.png',
   Japanese: '/assets/flag-jp.png',
-  Spanish: '/assets/flag-es.png',
+
+  French: '/assets/flag-fr.png',
 }
 
 const dayLabels = ['S', 'M', 'T', 'W', 'T', 'F', 'S']

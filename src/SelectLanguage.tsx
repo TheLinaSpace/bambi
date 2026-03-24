@@ -4,7 +4,7 @@ import './SelectLanguage.css'
 
 const illustration = '/assets/bambi-illustration.png'
 
-const languages = ['Arabic', 'German', 'Japanese']
+const languages = ['Arabic', 'French', 'German', 'Japanese']
 
 export default function SelectLanguage() {
   const [selected, setSelected] = useState<string | null>(null)
@@ -39,7 +39,14 @@ export default function SelectLanguage() {
         className={`select-button${selected ? ' active' : ''}`}
         disabled={!selected}
         onClick={() => {
-          if (selected) localStorage.setItem('selectedLanguage', selected)
+          if (selected) {
+            localStorage.setItem('selectedLanguage', selected)
+            const existing: string[] = JSON.parse(localStorage.getItem('userLanguages') || '[]')
+            if (!existing.includes(selected)) {
+              existing.push(selected)
+              localStorage.setItem('userLanguages', JSON.stringify(existing))
+            }
+          }
           navigate('/set-goal')
         }}
       >

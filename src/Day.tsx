@@ -17,26 +17,29 @@ interface WordDetails {
 
 const dayLabels: Record<string, string> = {
   Arabic: 'يوم',
-  English: 'Day',
+
   German: 'Tag',
   Japanese: '日',
-  Spanish: 'Día',
+
+  French: 'Jour',
 }
 
 const emptyStateLabels: Record<string, string> = {
   Arabic: '!لم تتم إضافة كلمات بعد',
-  English: 'No Words Added Yet!',
+
   German: 'Noch keine Wörter hinzugefügt!',
   Japanese: 'まだ単語が追加されていません！',
-  Spanish: '¡Aún no se han añadido palabras!',
+
+  French: 'Aucun mot ajouté !',
 }
 
 const languageFlags: Record<string, string> = {
-  Arabic: '/assets/flag-sa.png',
-  English: '/assets/flag-gb.png',
+  Arabic: '/assets/flag-lb.png',
+
   German: '/assets/flag-de.png',
   Japanese: '/assets/flag-jp.png',
-  Spanish: '/assets/flag-es.png',
+
+  French: '/assets/flag-fr.png',
 }
 
 export default function Day() {
@@ -53,11 +56,16 @@ export default function Day() {
   const [showScanModal, setShowScanModal] = useState(false)
   const [scanning, setScanning] = useState(false)
   const [showCelebration, setShowCelebration] = useState(false)
-  const [goalCelebrated, setGoalCelebrated] = useState(false)
+  const [goalCelebrated, setGoalCelebrated] = useState(() => {
+    return localStorage.getItem('goalCelebratedDate') === new Date().toISOString().split('T')[0]
+  })
   const cameraInputRef = useRef<HTMLInputElement>(null)
   const uploadInputRef = useRef<HTMLInputElement>(null)
-  const selectedLanguage = localStorage.getItem('selectedLanguage') || 'English'
-  const flagSrc = languageFlags[selectedLanguage] || '/assets/flag-gb.png'
+  const [showLangPicker, setShowLangPicker] = useState(false)
+  const [selectedLanguage, setSelectedLanguage] = useState(localStorage.getItem('selectedLanguage') || 'German')
+  const flagSrc = languageFlags[selectedLanguage] || '/assets/flag-de.png'
+  const userLanguages: string[] = JSON.parse(localStorage.getItem('userLanguages') || '[]')
+  const hasMultipleLanguages = userLanguages.length > 1
   const dailyGoal = localStorage.getItem('dailyGoal') || '8'
   const today = new Date()
   const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
@@ -148,6 +156,7 @@ export default function Day() {
     if (!goalCelebrated && words.length >= Number(dailyGoal) && words.length > 0) {
       setShowCelebration(true)
       setGoalCelebrated(true)
+      localStorage.setItem('goalCelebratedDate', new Date().toISOString().split('T')[0])
     }
   }, [words.length, dailyGoal, goalCelebrated])
 
@@ -171,7 +180,34 @@ export default function Day() {
             </div>
           </div>
         )}
-        <img className="day-flag" alt={selectedLanguage} src={flagSrc} />
+        {hasMultipleLanguages ? (
+          <button className="day-lang-picker-btn" onClick={() => setShowLangPicker(!showLangPicker)}>
+            <img className="day-flag" alt={selectedLanguage} src={flagSrc} />
+            <svg width="12" height="8" viewBox="0 0 12 8" fill="none"><path d="M1 1.5L6 6.5L11 1.5" stroke="#000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          </button>
+        ) : (
+          <img className="day-flag" alt={selectedLanguage} src={flagSrc} onClick={() => navigate('/select-language')} style={{ cursor: 'pointer' }} />
+        )}
+        {showLangPicker && hasMultipleLanguages && (
+          <div className="day-lang-overlay" onClick={() => setShowLangPicker(false)}>
+            <div className="day-lang-dropdown" onClick={(e) => e.stopPropagation()}>
+              {userLanguages.map((lang) => (
+                <button
+                  key={lang}
+                  className={`day-lang-option${lang === selectedLanguage ? ' active' : ''}`}
+                  onClick={() => {
+                    localStorage.setItem('selectedLanguage', lang)
+                    setSelectedLanguage(lang)
+                    setShowLangPicker(false)
+                  }}
+                >
+                  <img src={languageFlags[lang] || ''} alt="" className="day-lang-option-flag" />
+                  <span>{lang}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
         <div className="day-lives">
           <img alt="" src={`/assets/cat-lives-${getCatLives()}.png`} />
         </div>
