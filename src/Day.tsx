@@ -16,7 +16,7 @@ interface WordDetails {
 }
 
 const dayLabels: Record<string, string> = {
-  Arabic: 'يوم',
+  'Lebanese Arabic': 'Yawm',
 
   German: 'Tag',
   Japanese: '日',
@@ -25,7 +25,7 @@ const dayLabels: Record<string, string> = {
 }
 
 const emptyStateLabels: Record<string, string> = {
-  Arabic: '!لم تتم إضافة كلمات بعد',
+  'Lebanese Arabic': 'Ma fi kelimet ba3d!',
 
   German: 'Noch keine Wörter hinzugefügt!',
   Japanese: 'まだ単語が追加されていません！',
@@ -34,7 +34,7 @@ const emptyStateLabels: Record<string, string> = {
 }
 
 const languageFlags: Record<string, string> = {
-  Arabic: '/assets/flag-lb.png',
+  'Lebanese Arabic': '/assets/flag-lb.png',
 
   German: '/assets/flag-de.png',
   Japanese: '/assets/flag-jp.png',

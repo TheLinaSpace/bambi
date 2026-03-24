@@ -12,7 +12,7 @@ interface Question {
 }
 
 const languageFlags: Record<string, string> = {
-  Arabic: '/assets/flag-lb.png',
+  'Lebanese Arabic': '/assets/flag-lb.png',
 
   German: '/assets/flag-de.png',
   Japanese: '/assets/flag-jp.png',

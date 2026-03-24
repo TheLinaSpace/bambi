@@ -87,13 +87,14 @@ export const scanWordsFromImage = action({
             },
             {
               type: "text",
-              text: `Look at this image and extract individual ${args.language} words from it. These could be words on a sign, in a book, on a menu, etc.
+              text: `Look at this image and extract individual ${args.language === "Lebanese Arabic" ? "Lebanese Arabic" : args.language} words from it. These could be words on a sign, in a book, on a menu, etc.
 
 Rules:
-- Only include words that are actually in ${args.language}.
+- Only include words that are actually in ${args.language === "Lebanese Arabic" ? "Lebanese Arabic" : args.language}.
 - Return the base/dictionary form of each word when possible.
 - Maximum 20 words.
-- If no ${args.language} words are found, return an empty array.`,
+- If no ${args.language === "Lebanese Arabic" ? "Lebanese Arabic" : args.language} words are found, return an empty array.
+${args.language === "Lebanese Arabic" ? "- Use romanized/Latin alphabet transliteration (e.g. \"kifak\" not \"كيفك\"). Do NOT use Arabic script." : ""}`,
             },
           ],
         },
@@ -143,17 +144,18 @@ export const generateWordDetails = action({
       messages: [
         {
           role: "system",
-          content: `You are a language learning assistant. Given a word in ${args.language}, provide detailed information about it.
+          content: `You are a language learning assistant. Given a word in ${args.language === "Lebanese Arabic" ? "Lebanese Arabic (spoken dialect)" : args.language}, provide detailed information about it.
 
 Rules:
 - "conjugation" should only be populated if the word is a verb. For nouns/adjectives, return an empty array.
 - "prepositions" should list common prepositions used with this word. If none, return an empty array.
-- Use the conventions of ${args.language} for pronouns and grammatical terms.
-- The example sentence should be natural and useful for a learner.`,
+- Use the conventions of ${args.language === "Lebanese Arabic" ? "Lebanese Arabic" : args.language} for pronouns and grammatical terms.
+- The example sentence should be natural and useful for a learner.
+${args.language === "Lebanese Arabic" ? "- IMPORTANT: Use romanized/Latin alphabet transliteration for ALL Arabic text (e.g. \"kifak\" not \"كيفك\", \"shu\" not \"شو\"). Do NOT use Arabic script anywhere.\n- Use Lebanese dialect, NOT Modern Standard Arabic (e.g. \"shu\" instead of \"matha\", \"kifak\" instead of \"kayfa haluk\")." : ""}`,
         },
         {
           role: "user",
-          content: `Provide detailed information for the ${args.language} word: "${args.word}"`,
+          content: `Provide detailed information for the ${args.language === "Lebanese Arabic" ? "Lebanese Arabic" : args.language} word: "${args.word}"`,
         },
       ],
     });
@@ -223,11 +225,11 @@ export const generateQuiz = action({
       messages: [
         {
           role: "system",
-          content: `You are a language quiz generator. Given a list of ${args.language} words, generate a multiple choice quiz. For each word, provide the correct English translation and exactly 2 plausible but wrong English translations.`,
+          content: `You are a language quiz generator. Given a list of ${args.language === "Lebanese Arabic" ? "Lebanese Arabic (romanized)" : args.language} words, generate a multiple choice quiz. For each word, provide the correct English translation and exactly 2 plausible but wrong English translations.`,
         },
         {
           role: "user",
-          content: `Generate quiz questions for these ${args.language} words: ${args.words.join(", ")}`,
+          content: `Generate quiz questions for these ${args.language === "Lebanese Arabic" ? "Lebanese Arabic" : args.language} words: ${args.words.join(", ")}`,
         },
       ],
     });
