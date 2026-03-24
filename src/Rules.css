@@ -68,16 +68,16 @@
   font-size: 16px;
   color: #000;
   line-height: 1.3;
-  width: 232px;
+  flex: 1;
 }
 
 /* Ready button */
 .ready-button {
   position: fixed;
-  bottom: 60px;
+  bottom: max(32px, env(safe-area-inset-bottom));
   left: 50%;
   transform: translateX(-50%);
-  width: 246px;
+  width: min(246px, calc(100% - 48px));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -108,6 +108,11 @@
 @media (max-width: 768px) {
   .rules-title {
     white-space: normal;
-    padding-right: 48px;
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  .rules-steps {
+    padding: 0 24px;
   }
 }

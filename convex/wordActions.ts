@@ -180,3 +180,72 @@ Rules:
     return wordData;
   },
 });
+
+const quizSchema = {
+  type: "object" as const,
+  properties: {
+    questions: {
+      type: "array" as const,
+      items: {
+        type: "object" as const,
+        properties: {
+          word: { type: "string" as const },
+          correctAnswer: { type: "string" as const },
+          wrongAnswers: {
+            type: "array" as const,
+            items: { type: "string" as const },
+          },
+        },
+        required: ["word", "correctAnswer", "wrongAnswers"],
+      },
+    },
+  },
+  required: ["questions"],
+};
+
+export const generateQuiz = action({
+  args: { words: v.array(v.string()), language: v.string() },
+  handler: async (_ctx, args): Promise<
+    { word: string; correctAnswer: string; options: string[] }[]
+  > => {
+    const client = getClient();
+
+    const response = await client.chat.completions.create({
+      model: "google/gemini-2.0-flash-001",
+      response_format: {
+        type: "json_schema",
+        json_schema: {
+          name: "quiz",
+          strict: true,
+          schema: quizSchema,
+        },
+      },
+      messages: [
+        {
+          role: "system",
+          content: `You are a language quiz generator. Given a list of ${args.language} words, generate a multiple choice quiz. For each word, provide the correct English translation and exactly 2 plausible but wrong English translations.`,
+        },
+        {
+          role: "user",
+          content: `Generate quiz questions for these ${args.language} words: ${args.words.join(", ")}`,
+        },
+      ],
+    });
+
+    const content = response.choices[0]?.message?.content;
+    if (!content) throw new Error("No response from AI");
+
+    const data = JSON.parse(content);
+    return data.questions.map(
+      (q: { word: string; correctAnswer: string; wrongAnswers: string[] }) => {
+        const options = [q.correctAnswer, ...q.wrongAnswers.slice(0, 2)];
+        // Shuffle options
+        for (let i = options.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [options[i], options[j]] = [options[j], options[i]];
+        }
+        return { word: q.word, correctAnswer: q.correctAnswer, options };
+      }
+    );
+  },
+});

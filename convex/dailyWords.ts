@@ -13,6 +13,23 @@ export const getByDate = query({
   },
 });
 
+export const getByMonth = query({
+  args: { language: v.string(), yearMonth: v.string() },
+  handler: async (ctx, args) => {
+    const [year, month] = args.yearMonth.split("-").map(Number);
+    const startDate = `${year}-${String(month).padStart(2, "0")}-01`;
+    const nextMonth = month === 12 ? 1 : month + 1;
+    const nextYear = month === 12 ? year + 1 : year;
+    const endDate = `${nextYear}-${String(nextMonth).padStart(2, "0")}-01`;
+    return await ctx.db
+      .query("dailyWords")
+      .withIndex("by_language_and_date", (q) =>
+        q.eq("language", args.language).gte("date", startDate).lt("date", endDate)
+      )
+      .collect();
+  },
+});
+
 export const addWord = mutation({
   args: { word: v.string(), language: v.string(), date: v.string() },
   handler: async (ctx, args) => {

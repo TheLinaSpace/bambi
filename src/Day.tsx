@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAction, useQuery, useMutation } from 'convex/react'
 import { api } from '../convex/_generated/api'
 import './Day.css'
+import { getCatLives } from './lives'
 
 interface WordDetails {
   word: string
@@ -38,6 +40,8 @@ const languageFlags: Record<string, string> = {
 }
 
 export default function Day() {
+  const navigate = useNavigate()
+  const [showMenu, setShowMenu] = useState(false)
   const [showModal, setShowModal] = useState(false)
   const [word, setWord] = useState('')
   const [selectedWordIndex, setSelectedWordIndex] = useState<number | null>(null)
@@ -48,6 +52,8 @@ export default function Day() {
   const [selectedScanned, setSelectedScanned] = useState<Set<string>>(new Set())
   const [showScanModal, setShowScanModal] = useState(false)
   const [scanning, setScanning] = useState(false)
+  const [showCelebration, setShowCelebration] = useState(false)
+  const [goalCelebrated, setGoalCelebrated] = useState(false)
   const cameraInputRef = useRef<HTMLInputElement>(null)
   const uploadInputRef = useRef<HTMLInputElement>(null)
   const selectedLanguage = localStorage.getItem('selectedLanguage') || 'English'
@@ -138,17 +144,36 @@ export default function Day() {
       .finally(() => setLoading(false))
   }, [selectedWord, selectedLanguage, generateWordDetails])
 
+  useEffect(() => {
+    if (!goalCelebrated && words.length >= Number(dailyGoal) && words.length > 0) {
+      setShowCelebration(true)
+      setGoalCelebrated(true)
+    }
+  }, [words.length, dailyGoal, goalCelebrated])
+
   return (
     <div className="day-page">
       <div className="day-topbar">
-        <button className="day-menu-btn">
+        <button className="day-menu-btn" onClick={() => setShowMenu(!showMenu)}>
           <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M5 10H27M5 16H27M5 22H27" stroke="#1E1E1E" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </button>
+        {showMenu && (
+          <div className="day-menu-overlay" onClick={() => setShowMenu(false)}>
+            <div className="day-menu-dropdown" onClick={(e) => e.stopPropagation()}>
+              <button className="day-menu-item" onClick={() => { setShowMenu(false) }}>
+                Words Today
+              </button>
+              <button className="day-menu-item" onClick={() => { setShowMenu(false); navigate('/progress') }}>
+                Progress
+              </button>
+            </div>
+          </div>
+        )}
         <img className="day-flag" alt={selectedLanguage} src={flagSrc} />
         <div className="day-lives">
-          <img alt="" src="/assets/cat-lives-9.png" />
+          <img alt="" src={`/assets/cat-lives-${getCatLives()}.png`} />
         </div>
       </div>
 
@@ -231,16 +256,26 @@ export default function Day() {
         style={{ display: 'none' }}
       />
 
-      <div className="day-action-buttons">
-        <button className="day-action-btn" onClick={() => cameraInputRef.current?.click()}>
-          <img alt="Camera" src="/assets/icon-camera.png" />
-        </button>
-        <button className="day-action-btn" onClick={() => uploadInputRef.current?.click()}>
-          <img alt="Upload" src="/assets/icon-upload.png" />
-        </button>
-        <button className="day-action-btn" onClick={() => setShowModal(true)}>
-          <img alt="Add" src="/assets/icon-plus.png" />
-        </button>
+      <div className="day-bottom-bar">
+        {words.length >= Number(dailyGoal) && (
+          <button className="day-test-button" onClick={() => {
+            localStorage.setItem('testWords', JSON.stringify(words))
+            navigate('/test')
+          }}>
+            Test Me
+          </button>
+        )}
+        <div className="day-action-buttons">
+          <button className="day-action-btn" onClick={() => cameraInputRef.current?.click()}>
+            <img alt="Camera" src="/assets/icon-camera.png" />
+          </button>
+          <button className="day-action-btn" onClick={() => uploadInputRef.current?.click()}>
+            <img alt="Upload" src="/assets/icon-upload.png" />
+          </button>
+          <button className="day-action-btn" onClick={() => setShowModal(true)}>
+            <img alt="Add" src="/assets/icon-plus.png" />
+          </button>
+        </div>
       </div>
 
       {selectedWordIndex !== null && selectedWord && (
@@ -375,6 +410,21 @@ export default function Day() {
             >
               Cancel
             </button>
+          </div>
+        </div>
+      )}
+
+      {showCelebration && (
+        <div className="celebration-overlay" onClick={() => setShowCelebration(false)}>
+          <div className="celebration-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="celebration-close-row">
+              <button className="celebration-close" onClick={() => setShowCelebration(false)}>✕</button>
+            </div>
+            <h2 className="celebration-title">YAY! You reached your Word Goal</h2>
+            <div className="celebration-illustration">
+              <img alt="" src="/assets/bambi-tank.png" />
+            </div>
+            <p className="celebration-caption">Cat filled the word tank</p>
           </div>
         </div>
       )}

@@ -3,7 +3,9 @@
     "allow": [
       "mcp__plugin_figma_figma__get_screenshot",
       "mcp__plugin_figma_figma__get_design_context",
-      "Bash(curl -L -o /Users/linac/Documents/GitHub/bambi/public/assets/bambi-suggest.png \"https://www.figma.com/api/mcp/asset/ffe32672-bca3-4167-bed0-5832896a4e08\")"
+      "Bash(curl -L -o /Users/linac/Documents/GitHub/bambi/public/assets/bambi-suggest.png \"https://www.figma.com/api/mcp/asset/ffe32672-bca3-4167-bed0-5832896a4e08\")",
+      "mcp__plugin_figma_figma__get_metadata",
+      "Bash(curl -sL \"https://www.figma.com/api/mcp/asset/1d3ef7fd-10ba-4cc2-98b6-03ddbb890cc3\" -o /Users/linac/Documents/GitHub/bambi/public/assets/bambi-results.png)"
     ]
   }
 }

@@ -6,6 +6,8 @@ import SetGoal from './SetGoal'
 import Rules from './Rules'
 import LetsGo from './LetsGo'
 import Day from './Day'
+import Test from './Test'
+import Progress from './Progress'
 
 function App() {
   return (
@@ -16,6 +18,8 @@ function App() {
       <Route path="/rules" element={<Rules />} />
       <Route path="/lets-go" element={<LetsGo />} />
       <Route path="/day" element={<Day />} />
+      <Route path="/test" element={<Test />} />
+      <Route path="/progress" element={<Progress />} />
     </Routes>
   )
 }

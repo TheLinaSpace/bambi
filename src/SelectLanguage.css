@@ -171,3 +171,14 @@
   transform: translateX(-50%) translate(2px, 2px);
   box-shadow: none;
 }
+
+@media (max-width: 768px) {
+  .select-title {
+    white-space: normal;
+    text-align: center;
+  }
+
+  .select-button {
+    bottom: max(24px, env(safe-area-inset-bottom));
+  }
+}
