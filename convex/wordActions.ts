@@ -3,7 +3,110 @@
 import { v } from "convex/values";
 import { action } from "./_generated/server";
 import { internal } from "./_generated/api";
-import Anthropic from "@anthropic-ai/sdk";
+import OpenAI from "openai";
+
+const wordDetailsSchema = {
+  type: "object" as const,
+  properties: {
+    translation: { type: "string" as const, description: "English translation of the word" },
+    type: { type: "string" as const, description: "Word type, e.g. Verben, Nomen, Adjektiv" },
+    example: { type: "string" as const, description: "Example sentence using the word" },
+    conjugation: {
+      type: "array" as const,
+      items: {
+        type: "object" as const,
+        properties: {
+          pronoun: { type: "string" as const },
+          present: { type: "string" as const },
+          past: { type: "string" as const },
+        },
+        required: ["pronoun", "present", "past"],
+      },
+      description: "Verb conjugation table. Only for verbs, otherwise empty array.",
+    },
+    prepositions: {
+      type: "array" as const,
+      items: {
+        type: "object" as const,
+        properties: {
+          name: { type: "string" as const, description: "Preposition with case, e.g. Mit (DAT)" },
+          explanation: { type: "string" as const, description: "When and how to use it" },
+          example: { type: "string" as const, description: "Example sentence" },
+        },
+        required: ["name", "explanation", "example"],
+      },
+      description: "Common prepositions used with this word. Empty array if none.",
+    },
+  },
+  required: ["translation", "type", "example", "conjugation", "prepositions"],
+};
+
+const scanResultSchema = {
+  type: "object" as const,
+  properties: {
+    words: {
+      type: "array" as const,
+      items: { type: "string" as const },
+      description: "Array of words found in the image",
+    },
+  },
+  required: ["words"],
+};
+
+function getClient() {
+  return new OpenAI({
+    baseURL: "https://openrouter.ai/api/v1",
+    apiKey: process.env.OPENROUTER_API_KEY,
+  });
+}
+
+export const scanWordsFromImage = action({
+  args: { imageBase64: v.string(), language: v.string() },
+  handler: async (_ctx, args): Promise<string[]> => {
+    const client = getClient();
+
+    const response = await client.chat.completions.create({
+      model: "google/gemini-2.0-flash-001",
+      response_format: {
+        type: "json_schema",
+        json_schema: {
+          name: "scan_result",
+          strict: true,
+          schema: scanResultSchema,
+        },
+      },
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "image_url",
+              image_url: {
+                url: `data:image/jpeg;base64,${args.imageBase64}`,
+              },
+            },
+            {
+              type: "text",
+              text: `Look at this image and extract individual ${args.language} words from it. These could be words on a sign, in a book, on a menu, etc.
+
+Rules:
+- Only include words that are actually in ${args.language}.
+- Return the base/dictionary form of each word when possible.
+- Maximum 20 words.
+- If no ${args.language} words are found, return an empty array.`,
+            },
+          ],
+        },
+      ],
+    });
+
+    const content = response.choices[0]?.message?.content;
+    if (!content) return [];
+
+    const data = JSON.parse(content);
+    return data.words || [];
+  },
+});
 
 export const generateWordDetails = action({
   args: { word: v.string(), language: v.string() },
@@ -25,52 +128,42 @@ export const generateWordDetails = action({
       return existing;
     }
 
-    const client = new Anthropic();
+    const client = getClient();
 
-    const response = await client.messages.create({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: 1024,
+    const response = await client.chat.completions.create({
+      model: "google/gemini-2.0-flash-001",
+      response_format: {
+        type: "json_schema",
+        json_schema: {
+          name: "word_details",
+          strict: true,
+          schema: wordDetailsSchema,
+        },
+      },
       messages: [
         {
-          role: "user",
-          content: `You are a language learning assistant. Given a word in ${args.language}, provide detailed information about it. Return ONLY valid JSON with this exact structure:
-
-{
-  "translation": "English translation",
-  "type": "word type (e.g. Verben, Nomen, Adjektiv)",
-  "example": "An example sentence using the word in ${args.language}",
-  "conjugation": [
-    {"pronoun": "Ich", "present": "...", "past": "..."},
-    {"pronoun": "Du", "present": "...", "past": "..."},
-    {"pronoun": "Er/sie/es", "present": "...", "past": "..."},
-    {"pronoun": "wir", "present": "...", "past": "..."},
-    {"pronoun": "ihr", "present": "...", "past": "..."},
-    {"pronoun": "Sie", "present": "...", "past": "..."}
-  ],
-  "prepositions": [
-    {"name": "Preposition (CASE)", "explanation": "When and how to use it", "example": "Example sentence"}
-  ]
-}
+          role: "system",
+          content: `You are a language learning assistant. Given a word in ${args.language}, provide detailed information about it.
 
 Rules:
-- "conjugation" should only be included if the word is a verb. For nouns/adjectives, omit it or set to null.
-- "prepositions" should list common prepositions used with this word, if any. Otherwise omit or set to null.
+- "conjugation" should only be populated if the word is a verb. For nouns/adjectives, return an empty array.
+- "prepositions" should list common prepositions used with this word. If none, return an empty array.
 - Use the conventions of ${args.language} for pronouns and grammatical terms.
-- The example sentence should be natural and useful for a learner.
-
-The word is: "${args.word}"`,
+- The example sentence should be natural and useful for a learner.`,
+        },
+        {
+          role: "user",
+          content: `Provide detailed information for the ${args.language} word: "${args.word}"`,
         },
       ],
     });
 
-    const text =
-      response.content[0].type === "text" ? response.content[0].text : "";
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      throw new Error("Failed to parse AI response");
+    const content = response.choices[0]?.message?.content;
+    if (!content) {
+      throw new Error("No response from AI");
     }
 
-    const data = JSON.parse(jsonMatch[0]);
+    const data = JSON.parse(content);
 
     const wordData = {
       word: args.word,
@@ -78,8 +171,8 @@ The word is: "${args.word}"`,
       translation: data.translation || "...",
       type: data.type || "--",
       example: data.example || "...",
-      conjugation: data.conjugation || undefined,
-      prepositions: data.prepositions || undefined,
+      conjugation: data.conjugation?.length ? data.conjugation : undefined,
+      prepositions: data.prepositions?.length ? data.prepositions : undefined,
     };
 
     await ctx.runMutation(internal.words.storeWord, wordData);

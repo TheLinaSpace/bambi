@@ -12,7 +12,7 @@ export default function LetsGo() {
   useEffect(() => {
     const timer = setTimeout(() => {
       navigate('/day')
-    }, 15000)
+    }, 5000)
     return () => clearTimeout(timer)
   }, [navigate])
 

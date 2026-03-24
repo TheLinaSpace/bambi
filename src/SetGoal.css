@@ -115,3 +115,37 @@
   transform: translateX(-50%) translate(2px, 2px);
   box-shadow: none;
 }
+
+@media (max-width: 768px) {
+  .goal-character-area {
+    min-height: auto;
+    flex: 0;
+    order: 1;
+  }
+
+  .goal-suggest-illustration {
+    position: relative;
+    top: auto;
+    left: auto;
+    width: min(332px, 85%);
+    margin-top: 24px;
+  }
+
+  .goal-select-button {
+    position: relative;
+    bottom: auto;
+    left: auto;
+    transform: none;
+    order: 2;
+    margin-top: 24px;
+    margin-bottom: 40px;
+  }
+
+  .goal-select-button.active:hover {
+    transform: translate(1px, 1px);
+  }
+
+  .goal-select-button.active:active {
+    transform: translate(2px, 2px);
+  }
+}

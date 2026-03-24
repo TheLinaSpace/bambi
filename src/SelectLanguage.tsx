@@ -4,7 +4,7 @@ import './SelectLanguage.css'
 
 const illustration = '/assets/bambi-illustration.png'
 
-const languages = ['Arabic', 'English', 'German', 'Japanese', 'Spanish']
+const languages = ['Arabic', 'German', 'Japanese']
 
 export default function SelectLanguage() {
   const [selected, setSelected] = useState<string | null>(null)

@@ -26,7 +26,6 @@ body {
   margin: 0 auto;
   min-height: 100svh;
   position: relative;
-  overflow: hidden;
 }
 
 /* Ensure modals/overlays can escape the max-width container */

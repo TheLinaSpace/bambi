@@ -104,3 +104,10 @@
   transform: translateX(-50%) translate(2px, 2px);
   box-shadow: none;
 }
+
+@media (max-width: 768px) {
+  .rules-title {
+    white-space: normal;
+    padding-right: 48px;
+  }
+}

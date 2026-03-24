@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as dailyWords from "../dailyWords.js";
 import type * as wordActions from "../wordActions.js";
 import type * as words from "../words.js";
 
@@ -18,6 +19,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  dailyWords: typeof dailyWords;
   wordActions: typeof wordActions;
   words: typeof words;
 }>;

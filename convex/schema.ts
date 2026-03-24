@@ -45,4 +45,9 @@ export default defineSchema({
       )
     ),
   }).index("by_word_and_language", ["word", "language"]),
+  dailyWords: defineTable({
+    word: v.string(),
+    language: v.string(),
+    date: v.string(),
+  }).index("by_language_and_date", ["language", "date"]),
 });

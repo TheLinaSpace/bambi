@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { useAction } from 'convex/react'
+import { useState, useEffect, useRef } from 'react'
+import { useAction, useQuery, useMutation } from 'convex/react'
 import { api } from '../convex/_generated/api'
 import './Day.css'
 
@@ -40,21 +40,86 @@ const languageFlags: Record<string, string> = {
 export default function Day() {
   const [showModal, setShowModal] = useState(false)
   const [word, setWord] = useState('')
-  const [words, setWords] = useState<string[]>([])
-  const [selectedWord, setSelectedWord] = useState<string | null>(null)
+  const [selectedWordIndex, setSelectedWordIndex] = useState<number | null>(null)
+  const [slideDirection, setSlideDirection] = useState<'up' | 'down'>('up')
   const [wordDetails, setWordDetails] = useState<WordDetails | null>(null)
   const [loading, setLoading] = useState(false)
+  const [scannedWords, setScannedWords] = useState<string[]>([])
+  const [selectedScanned, setSelectedScanned] = useState<Set<string>>(new Set())
+  const [showScanModal, setShowScanModal] = useState(false)
+  const [scanning, setScanning] = useState(false)
+  const cameraInputRef = useRef<HTMLInputElement>(null)
   const selectedLanguage = localStorage.getItem('selectedLanguage') || 'English'
   const flagSrc = languageFlags[selectedLanguage] || '/assets/flag-gb.png'
   const dailyGoal = localStorage.getItem('dailyGoal') || '8'
   const today = new Date()
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
   const dateStr = today.toLocaleDateString('en-GB', {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
   })
 
+  const dailyWordsData = useQuery(api.dailyWords.getByDate, { language: selectedLanguage, date: todayStr })
+  const addWord = useMutation(api.dailyWords.addWord)
+  const words = dailyWordsData?.map((d) => d.word) ?? []
+  const selectedWord = selectedWordIndex !== null ? words[selectedWordIndex] ?? null : null
+  const prevWord = selectedWordIndex !== null && selectedWordIndex > 0 ? words[selectedWordIndex - 1] : null
+  const nextWord = selectedWordIndex !== null && selectedWordIndex < words.length - 1 ? words[selectedWordIndex + 1] : null
+
   const generateWordDetails = useAction(api.wordActions.generateWordDetails)
+  const scanWordsFromImage = useAction(api.wordActions.scanWordsFromImage)
+
+  const compressImage = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image()
+      img.onload = () => {
+        const canvas = document.createElement('canvas')
+        const maxSize = 1024
+        let { width, height } = img
+        if (width > height && width > maxSize) {
+          height = (height * maxSize) / width
+          width = maxSize
+        } else if (height > maxSize) {
+          width = (width * maxSize) / height
+          height = maxSize
+        }
+        canvas.width = width
+        canvas.height = height
+        const ctx = canvas.getContext('2d')!
+        ctx.drawImage(img, 0, 0, width, height)
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.7)
+        resolve(dataUrl.split(',')[1])
+      }
+      img.onerror = reject
+      img.src = URL.createObjectURL(file)
+    })
+  }
+
+  const handleCameraCapture = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setScanning(true)
+    setShowScanModal(true)
+
+    try {
+      const base64 = await compressImage(file)
+      const words = await scanWordsFromImage({
+        imageBase64: base64,
+        language: selectedLanguage,
+      })
+      setScannedWords(words)
+      setSelectedScanned(new Set(words))
+    } catch {
+      setScannedWords([])
+    } finally {
+      setScanning(false)
+    }
+
+    // Reset input so same file can be selected again
+    e.target.value = ''
+  }
 
   useEffect(() => {
     if (!selectedWord) {
@@ -79,7 +144,7 @@ export default function Day() {
         </button>
         <img className="day-flag" alt={selectedLanguage} src={flagSrc} />
         <div className="day-lives">
-          <img alt="" src="/assets/icon-cat-lives.svg" />
+          <img alt="" src="/assets/cat-lives-9.png" />
         </div>
       </div>
 
@@ -103,15 +168,24 @@ export default function Day() {
       ) : (
         <div className="day-words-grid">
           {words.map((w, i) => (
-            <div key={i} className="day-word-card" onClick={() => setSelectedWord(w)}>
+            <div key={i} className="day-word-card" onClick={() => setSelectedWordIndex(i)}>
               <span>{w}</span>
             </div>
           ))}
         </div>
       )}
 
+      <input
+        ref={cameraInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        onChange={handleCameraCapture}
+        style={{ display: 'none' }}
+      />
+
       <div className="day-action-buttons">
-        <button className="day-action-btn">
+        <button className="day-action-btn" onClick={() => cameraInputRef.current?.click()}>
           <img alt="Camera" src="/assets/icon-camera.png" />
         </button>
         <button className="day-action-btn">
@@ -122,20 +196,24 @@ export default function Day() {
         </button>
       </div>
 
-      {selectedWord && (
-        <div className="word-detail-overlay" onClick={() => setSelectedWord(null)}>
+      {selectedWordIndex !== null && selectedWord && (
+        <div className="word-detail-overlay" onClick={() => setSelectedWordIndex(null)}>
           <div className="word-detail-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="word-detail-header">
-              <h2 className="word-detail-word">{selectedWord}</h2>
-            </div>
-            <div className="word-detail-body">
+            {prevWord && (
+              <div className="word-detail-prev" onClick={() => { setSlideDirection('down'); setSelectedWordIndex(selectedWordIndex - 1); }}>
+                <h2 className="word-detail-prev-text">{prevWord}</h2>
+              </div>
+            )}
+            <div key={selectedWordIndex} className={`word-detail-body slide-${slideDirection}`}>
               {loading ? (
                 <p className="word-detail-loading">Loading...</p>
               ) : wordDetails ? (
                 <>
                   <div className="word-detail-translation">
-                    <span className="word-detail-original">{wordDetails.word}</span>
-                    <span className="word-detail-equals">=</span>
+                    <div className="word-detail-translation-row">
+                      <span className="word-detail-original">{wordDetails.word}</span>
+                      <span className="word-detail-equals">=</span>
+                    </div>
                     <span className="word-detail-meaning">{wordDetails.translation}</span>
                   </div>
                   <p className="word-detail-type">({wordDetails.type})</p>
@@ -189,7 +267,67 @@ export default function Day() {
               ) : (
                 <p className="word-detail-loading">Failed to load word details.</p>
               )}
+              {nextWord && (
+                <button className="word-detail-next" onClick={() => { setSlideDirection('up'); setSelectedWordIndex(selectedWordIndex + 1); }}>
+                  {nextWord} →
+                </button>
+              )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {showScanModal && (
+        <div className="day-modal-overlay" onClick={() => { setShowScanModal(false); setScannedWords([]); }}>
+          <div className="day-modal" onClick={(e) => e.stopPropagation()}>
+            <h2 className="day-modal-title">Words Found</h2>
+            {scanning ? (
+              <p className="scan-loading">Scanning image...</p>
+            ) : scannedWords.length === 0 ? (
+              <p className="scan-loading">No words found. Try another photo.</p>
+            ) : (
+              <>
+                <div className="scan-words-list">
+                  {scannedWords.map((w) => (
+                    <button
+                      key={w}
+                      className={`scan-word-item${selectedScanned.has(w) ? ' selected' : ''}`}
+                      onClick={() => {
+                        const next = new Set(selectedScanned)
+                        if (next.has(w)) next.delete(w)
+                        else next.add(w)
+                        setSelectedScanned(next)
+                      }}
+                    >
+                      <div className="language-checkbox">
+                        <span className="checkmark">✓</span>
+                      </div>
+                      <span>{w}</span>
+                    </button>
+                  ))}
+                </div>
+                <button
+                  className="day-modal-submit"
+                  disabled={selectedScanned.size === 0}
+                  onClick={() => {
+                    Array.from(selectedScanned).forEach((w) =>
+                      addWord({ word: w, language: selectedLanguage, date: todayStr })
+                    )
+                    setShowScanModal(false)
+                    setScannedWords([])
+                    setSelectedScanned(new Set())
+                  }}
+                >
+                  Add {selectedScanned.size} word{selectedScanned.size !== 1 ? 's' : ''}
+                </button>
+              </>
+            )}
+            <button
+              className="day-modal-cancel"
+              onClick={() => { setShowScanModal(false); setScannedWords([]); }}
+            >
+              Cancel
+            </button>
           </div>
         </div>
       )}
@@ -209,7 +347,7 @@ export default function Day() {
               className="day-modal-submit"
               disabled={!word.trim()}
               onClick={() => {
-                setWords([...words, word.trim()])
+                addWord({ word: word.trim(), language: selectedLanguage, date: todayStr })
                 setWord('')
                 setShowModal(false)
               }}
