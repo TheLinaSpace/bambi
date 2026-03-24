@@ -55,7 +55,6 @@ export default function Progress() {
 
   const isToday = viewYear === today.getFullYear() && viewMonth === today.getMonth() + 1
 
-  const selectedDate = `${viewYear}-${String(viewMonth).padStart(2, '0')}-${String(selectedDay).padStart(2, '0')}`
   const selectedWords = wordsByDay[selectedDay] || []
   const selectedPercentage = dailyGoal > 0 ? Math.min(Math.round((selectedWords.length / dailyGoal) * 100), 100) : 0
   const selectedDateStr = new Date(viewYear, viewMonth - 1, selectedDay).toLocaleDateString('en-GB', {

@@ -32,7 +32,7 @@ export default function Test() {
   const [results, setResults] = useState<('correct' | 'wrong' | null)[]>([])
   const [loading, setLoading] = useState(true)
   const [lives, setLivesState] = useState(() => getCatLives())
-  const [attempt, setAttempt] = useState(() => {
+  const [attempt] = useState(() => {
     const stored = localStorage.getItem('testAttempt')
     return stored ? Number(stored) : 1
   })
@@ -64,7 +64,6 @@ export default function Test() {
 
   const currentQuestion = questions[currentIndex]
   const isCorrect = submitted && selectedAnswer === currentQuestion?.correctAnswer
-  const isWrong = submitted && selectedAnswer !== currentQuestion?.correctAnswer
   const isFinished = currentIndex >= questions.length && questions.length > 0
 
   const handleSubmit = () => {
