@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useAction } from 'convex/react'
+import { useAction, useQuery, useMutation } from 'convex/react'
 import { api } from '../convex/_generated/api'
 import './Test.css'
-import { getCatLives } from './lives'
 
 interface Question {
   word: string
@@ -23,7 +22,8 @@ const languageFlags: Record<string, string> = {
 export default function Test() {
   const navigate = useNavigate()
   const generateQuiz = useAction(api.wordActions.generateQuiz)
-  const selectedLanguage = localStorage.getItem('selectedLanguage') || 'English'
+  const prefs = useQuery(api.userPreferences.get)
+  const selectedLanguage = prefs?.selectedLanguage ?? 'German'
   const flagSrc = languageFlags[selectedLanguage] || '/assets/flag-gb.png'
 
   const [questions, setQuestions] = useState<Question[]>([])
@@ -32,19 +32,17 @@ export default function Test() {
   const [submitted, setSubmitted] = useState(false)
   const [results, setResults] = useState<('correct' | 'wrong' | null)[]>([])
   const [loading, setLoading] = useState(true)
-  const [lives, setLivesState] = useState(() => getCatLives())
+  const [lives, setLives] = useState(9)
+  const loseLife = useMutation(api.userPreferences.loseLife)
+
+  useEffect(() => {
+    if (prefs?.catLives !== undefined) setLives(prefs.catLives)
+  }, [prefs?.catLives])
+
   const [attempt] = useState(() => {
     const stored = localStorage.getItem('testAttempt')
     return stored ? Number(stored) : 1
   })
-
-  const setLives = (updater: number | ((prev: number) => number)) => {
-    setLivesState((prev) => {
-      const next = typeof updater === 'function' ? updater(prev) : updater
-      localStorage.setItem('catLives', String(next))
-      return next
-    })
-  }
 
   useEffect(() => {
     const storedWords = localStorage.getItem('testWords')
@@ -75,7 +73,7 @@ export default function Test() {
       newResults[currentIndex] = 'correct'
     } else {
       newResults[currentIndex] = 'wrong'
-      setLives((l) => Math.max(0, l - 1))
+      loseLife().then((newLives) => setLives(newLives))
     }
     setResults(newResults)
   }

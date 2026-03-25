@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useMutation } from 'convex/react'
+import { api } from '../convex/_generated/api'
 import './SelectLanguage.css'
 
 const illustration = '/assets/bambi-illustration.png'
@@ -9,6 +11,7 @@ const languages = ['Lebanese Arabic', 'French', 'German', 'Japanese']
 export default function SelectLanguage() {
   const [selected, setSelected] = useState<string | null>(null)
   const navigate = useNavigate()
+  const setLanguage = useMutation(api.userPreferences.setLanguage)
 
   return (
     <div className="select-language-page">
@@ -40,12 +43,7 @@ export default function SelectLanguage() {
         disabled={!selected}
         onClick={() => {
           if (selected) {
-            localStorage.setItem('selectedLanguage', selected)
-            const existing: string[] = JSON.parse(localStorage.getItem('userLanguages') || '[]')
-            if (!existing.includes(selected)) {
-              existing.push(selected)
-              localStorage.setItem('userLanguages', JSON.stringify(existing))
-            }
+            setLanguage({ selectedLanguage: selected })
           }
           navigate('/set-goal')
         }}

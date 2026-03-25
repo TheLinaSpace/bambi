@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAction, useQuery, useMutation } from 'convex/react'
 import { api } from '../convex/_generated/api'
 import './Day.css'
-import { getCatLives } from './lives'
+import { useUserPreferences } from './useUserPreferences'
 
 interface WordDetails {
   word: string
@@ -62,11 +62,13 @@ export default function Day() {
   const cameraInputRef = useRef<HTMLInputElement>(null)
   const uploadInputRef = useRef<HTMLInputElement>(null)
   const [showLangPicker, setShowLangPicker] = useState(false)
-  const [selectedLanguage, setSelectedLanguage] = useState(localStorage.getItem('selectedLanguage') || 'German')
+  const prefs = useUserPreferences()
+  const [selectedLanguage, setSelectedLanguage] = useState(prefs.selectedLanguage)
+  const setLanguage = useMutation(api.userPreferences.setLanguage)
   const flagSrc = languageFlags[selectedLanguage] || '/assets/flag-de.png'
-  const userLanguages: string[] = JSON.parse(localStorage.getItem('userLanguages') || '[]')
+  const userLanguages = prefs.userLanguages
   const hasMultipleLanguages = userLanguages.length > 1
-  const dailyGoal = localStorage.getItem('dailyGoal') || '8'
+  const dailyGoal = prefs.dailyGoal
   const today = new Date()
   const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
   const dateStr = today.toLocaleDateString('en-GB', {
@@ -84,6 +86,10 @@ export default function Day() {
   const selectedWord = selectedWordIndex !== null ? words[selectedWordIndex] ?? null : null
   const prevWord = selectedWordIndex !== null && selectedWordIndex > 0 ? words[selectedWordIndex - 1] : null
   const nextWord = selectedWordIndex !== null && selectedWordIndex < words.length - 1 ? words[selectedWordIndex + 1] : null
+
+  useEffect(() => {
+    if (!prefs.isLoading) setSelectedLanguage(prefs.selectedLanguage)
+  }, [prefs.selectedLanguage, prefs.isLoading])
 
   const generateWordDetails = useAction(api.wordActions.generateWordDetails)
   const scanWordsFromImage = useAction(api.wordActions.scanWordsFromImage)
@@ -153,7 +159,7 @@ export default function Day() {
   }, [selectedWord, selectedLanguage, generateWordDetails])
 
   useEffect(() => {
-    if (!goalCelebrated && words.length >= Number(dailyGoal) && words.length > 0) {
+    if (!goalCelebrated && words.length >= dailyGoal && words.length > 0) {
       setShowCelebration(true)
       setGoalCelebrated(true)
       localStorage.setItem('goalCelebratedDate', new Date().toISOString().split('T')[0])
@@ -196,7 +202,7 @@ export default function Day() {
                   key={lang}
                   className={`day-lang-option${lang === selectedLanguage ? ' active' : ''}`}
                   onClick={() => {
-                    localStorage.setItem('selectedLanguage', lang)
+                    setLanguage({ selectedLanguage: lang })
                     setSelectedLanguage(lang)
                     setShowLangPicker(false)
                   }}
@@ -209,7 +215,7 @@ export default function Day() {
           </div>
         )}
         <div className="day-lives">
-          <img alt="" src={`/assets/cat-lives-${getCatLives()}.png`} />
+          <img alt="" src={`/assets/cat-lives-${prefs.catLives}.png`} />
         </div>
       </div>
 
@@ -218,7 +224,7 @@ export default function Day() {
 
       <div className="day-progress-row">
         <div className="day-progress-bar">
-          <div className="day-progress-fill" style={{ width: `${Math.min((words.length / Number(dailyGoal)) * 100, 100)}%` }} />
+          <div className="day-progress-fill" style={{ width: `${Math.min((words.length / dailyGoal) * 100, 100)}%` }} />
         </div>
         <span className="day-progress-text">{words.length} / {dailyGoal}</span>
       </div>
@@ -293,7 +299,7 @@ export default function Day() {
       />
 
       <div className="day-bottom-bar">
-        {words.length >= Number(dailyGoal) && (
+        {words.length >= dailyGoal && (
           <button className="day-test-button" onClick={() => {
             localStorage.setItem('testWords', JSON.stringify(words))
             navigate('/test')

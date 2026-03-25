@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useQuery } from 'convex/react'
+import { useQuery, useMutation } from 'convex/react'
 import { api } from '../convex/_generated/api'
 import './Progress.css'
-import { getCatLives } from './lives'
+import { useUserPreferences } from './useUserPreferences'
 
 const languageFlags: Record<string, string> = {
   'Lebanese Arabic': '/assets/flag-lb.png',
@@ -26,9 +26,11 @@ function getFirstDayOfWeek(year: number, month: number) {
 
 export default function Progress() {
   const navigate = useNavigate()
-  const selectedLanguage = localStorage.getItem('selectedLanguage') || 'English'
+  const prefs = useUserPreferences()
+  const setGoalMutation = useMutation(api.userPreferences.setGoal)
+  const selectedLanguage = prefs.selectedLanguage
   const flagSrc = languageFlags[selectedLanguage] || '/assets/flag-gb.png'
-  const [dailyGoal, setDailyGoal] = useState(Number(localStorage.getItem('dailyGoal') || '8'))
+  const [dailyGoal, setDailyGoal] = useState(prefs.dailyGoal)
   const [showGoalModal, setShowGoalModal] = useState(false)
   const [goalInput, setGoalInput] = useState('')
 
@@ -105,7 +107,7 @@ export default function Progress() {
         </button>
         <img className="progress-flag" alt={selectedLanguage} src={flagSrc} />
         <div className="progress-lives">
-          <img alt="" src={`/assets/cat-lives-${getCatLives()}.png`} />
+          <img alt="" src={`/assets/cat-lives-${prefs.catLives}.png`} />
         </div>
       </div>
 
@@ -202,7 +204,7 @@ export default function Progress() {
               onClick={() => {
                 const newGoal = Number(goalInput)
                 if (newGoal >= 1) {
-                  localStorage.setItem('dailyGoal', String(newGoal))
+                  setGoalMutation({ dailyGoal: newGoal })
                   setDailyGoal(newGoal)
                   setShowGoalModal(false)
                 }

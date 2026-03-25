@@ -11,6 +11,7 @@
 import type * as auth from "../auth.js";
 import type * as dailyWords from "../dailyWords.js";
 import type * as http from "../http.js";
+import type * as userPreferences from "../userPreferences.js";
 import type * as wordActions from "../wordActions.js";
 import type * as words from "../words.js";
 
@@ -24,6 +25,7 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   dailyWords: typeof dailyWords;
   http: typeof http;
+  userPreferences: typeof userPreferences;
   wordActions: typeof wordActions;
   words: typeof words;
 }>;

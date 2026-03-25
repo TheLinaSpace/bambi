@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useMutation } from 'convex/react'
+import { api } from '../convex/_generated/api'
 import './SetGoal.css'
 
 const bambiSuggest = '/assets/bambi-suggest.png'
@@ -7,6 +9,7 @@ const bambiSuggest = '/assets/bambi-suggest.png'
 export default function SetGoal() {
   const [goal, setGoal] = useState('')
   const navigate = useNavigate()
+  const setGoalMutation = useMutation(api.userPreferences.setGoal)
 
   const hasGoal = goal.trim().length > 0
 
@@ -31,7 +34,8 @@ export default function SetGoal() {
         className={`goal-select-button${hasGoal ? ' active' : ''}`}
         disabled={!hasGoal}
         onClick={() => {
-          localStorage.setItem('dailyGoal', goal.trim())
+          const num = Number(goal.trim())
+          if (num >= 1) setGoalMutation({ dailyGoal: num })
           navigate('/rules')
         }}
       >

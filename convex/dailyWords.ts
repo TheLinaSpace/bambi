@@ -1,12 +1,12 @@
 import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
+import { getAuthUserId } from "@convex-dev/auth/server";
 
 export const getByDate = query({
   args: { language: v.string(), date: v.string() },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) return [];
-    const userId = identity.tokenIdentifier;
+    const userId = await getAuthUserId(ctx);
+    if (!userId) return [];
     return await ctx.db
       .query("dailyWords")
       .withIndex("by_user_language_date", (q) =>
@@ -19,9 +19,8 @@ export const getByDate = query({
 export const getByMonth = query({
   args: { language: v.string(), yearMonth: v.string() },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) return [];
-    const userId = identity.tokenIdentifier;
+    const userId = await getAuthUserId(ctx);
+    if (!userId) return [];
     const [year, month] = args.yearMonth.split("-").map(Number);
     const startDate = `${year}-${String(month).padStart(2, "0")}-01`;
     const nextMonth = month === 12 ? 1 : month + 1;
@@ -39,9 +38,8 @@ export const getByMonth = query({
 export const addWord = mutation({
   args: { word: v.string(), language: v.string(), date: v.string() },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-    const userId = identity.tokenIdentifier;
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Not authenticated");
     return await ctx.db.insert("dailyWords", { ...args, userId });
   },
 });
@@ -49,9 +47,8 @@ export const addWord = mutation({
 export const removeWord = mutation({
   args: { word: v.string(), language: v.string(), date: v.string() },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-    const userId = identity.tokenIdentifier;
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Not authenticated");
     const entry = await ctx.db
       .query("dailyWords")
       .withIndex("by_user_language_date", (q) =>
