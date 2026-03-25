@@ -6,7 +6,7 @@ export const getByDate = query({
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) return [];
-    const userId = identity.subject;
+    const userId = identity.tokenIdentifier;
     return await ctx.db
       .query("dailyWords")
       .withIndex("by_user_language_date", (q) =>
@@ -21,7 +21,7 @@ export const getByMonth = query({
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) return [];
-    const userId = identity.subject;
+    const userId = identity.tokenIdentifier;
     const [year, month] = args.yearMonth.split("-").map(Number);
     const startDate = `${year}-${String(month).padStart(2, "0")}-01`;
     const nextMonth = month === 12 ? 1 : month + 1;
@@ -41,7 +41,7 @@ export const addWord = mutation({
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Not authenticated");
-    const userId = identity.subject;
+    const userId = identity.tokenIdentifier;
     return await ctx.db.insert("dailyWords", { ...args, userId });
   },
 });
@@ -51,7 +51,7 @@ export const removeWord = mutation({
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Not authenticated");
-    const userId = identity.subject;
+    const userId = identity.tokenIdentifier;
     const entry = await ctx.db
       .query("dailyWords")
       .withIndex("by_user_language_date", (q) =>
