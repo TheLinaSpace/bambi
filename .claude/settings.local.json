@@ -7,7 +7,8 @@
       "mcp__plugin_figma_figma__get_metadata",
       "Bash(curl -sL \"https://www.figma.com/api/mcp/asset/1d3ef7fd-10ba-4cc2-98b6-03ddbb890cc3\" -o /Users/linac/Documents/GitHub/bambi/public/assets/bambi-results.png)",
       "mcp__convex__data",
-      "mcp__convex__run"
+      "mcp__convex__run",
+      "mcp__plugin_figma_figma__use_figma"
     ]
   }
 }

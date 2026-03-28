@@ -219,7 +219,7 @@ export default function Day() {
         </div>
       </div>
 
-      <h1 className="day-title">{dayLabels[selectedLanguage] || 'Day'} 1</h1>
+      <h1 className="day-title">{dayLabels[selectedLanguage] || 'Day'} {prefs.dayNumber}</h1>
       <p className="day-date">{dateStr}</p>
 
       <div className="day-progress-row">

@@ -35,6 +35,20 @@ export const getByMonth = query({
   },
 });
 
+export const getAllWords = query({
+  args: { language: v.string() },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) return [];
+    return await ctx.db
+      .query("dailyWords")
+      .withIndex("by_user_language_date", (q) =>
+        q.eq("userId", userId).eq("language", args.language)
+      )
+      .collect();
+  },
+});
+
 export const addWord = mutation({
   args: { word: v.string(), language: v.string(), date: v.string() },
   handler: async (ctx, args) => {

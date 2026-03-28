@@ -37,10 +37,11 @@ export default function Progress() {
   const today = new Date()
   const [viewYear, setViewYear] = useState(today.getFullYear())
   const [viewMonth, setViewMonth] = useState(today.getMonth() + 1)
-  const [selectedDay, setSelectedDay] = useState(today.getDate())
+  const [selectedDay, setSelectedDay] = useState<number | null>(null)
 
   const yearMonth = `${viewYear}-${String(viewMonth).padStart(2, '0')}`
   const monthData = useQuery(api.dailyWords.getByMonth, { language: selectedLanguage, yearMonth })
+  const allWordsData = useQuery(api.dailyWords.getAllWords, { language: selectedLanguage })
 
   const daysInMonth = getDaysInMonth(viewYear, viewMonth)
   const firstDay = getFirstDayOfWeek(viewYear, viewMonth)
@@ -58,13 +59,13 @@ export default function Progress() {
 
   const isToday = viewYear === today.getFullYear() && viewMonth === today.getMonth() + 1
 
-  const selectedWords = wordsByDay[selectedDay] || []
-  const selectedPercentage = dailyGoal > 0 ? Math.min(Math.round((selectedWords.length / dailyGoal) * 100), 100) : 0
-  const selectedDateStr = new Date(viewYear, viewMonth - 1, selectedDay).toLocaleDateString('en-GB', {
+  const selectedWords = selectedDay !== null ? (wordsByDay[selectedDay] || []) : []
+  const selectedPercentage = selectedDay !== null && dailyGoal > 0 ? Math.min(Math.round((selectedWords.length / dailyGoal) * 100), 100) : 0
+  const selectedDateStr = selectedDay !== null ? new Date(viewYear, viewMonth - 1, selectedDay).toLocaleDateString('en-GB', {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
-  })
+  }) : ''
 
   const prevMonth = () => {
     if (viewMonth === 1) {
@@ -73,7 +74,7 @@ export default function Progress() {
     } else {
       setViewMonth(viewMonth - 1)
     }
-    setSelectedDay(1)
+    setSelectedDay(null)
   }
 
   const nextMonth = () => {
@@ -83,7 +84,7 @@ export default function Progress() {
     } else {
       setViewMonth(viewMonth + 1)
     }
-    setSelectedDay(1)
+    setSelectedDay(null)
   }
 
   // Build calendar grid rows (7 cells per row)
@@ -97,14 +98,28 @@ export default function Progress() {
     rows.push(cells.slice(i, i + 7))
   }
 
+  const [showMenu, setShowMenu] = useState(false)
+
   return (
     <div className="progress-page">
       <div className="progress-topbar">
-        <button className="progress-menu-btn" onClick={() => navigate('/day')}>
+        <button className="progress-menu-btn" onClick={() => setShowMenu(!showMenu)}>
           <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M5 10H27M5 16H27M5 22H27" stroke="#1E1E1E" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </button>
+        {showMenu && (
+          <div className="day-menu-overlay" onClick={() => setShowMenu(false)}>
+            <div className="day-menu-dropdown" onClick={(e) => e.stopPropagation()}>
+              <button className="day-menu-item" onClick={() => { setShowMenu(false); navigate('/day') }}>
+                Words Today
+              </button>
+              <button className="day-menu-item" onClick={() => { setShowMenu(false) }}>
+                Progress
+              </button>
+            </div>
+          </div>
+        )}
         <img className="progress-flag" alt={selectedLanguage} src={flagSrc} />
         <div className="progress-lives">
           <img alt="" src={`/assets/cat-lives-${prefs.catLives}.png`} />
@@ -134,10 +149,13 @@ export default function Progress() {
               const isSelected = day === selectedDay
               const cellDate = new Date(viewYear, viewMonth - 1, day)
               const isFuture = cellDate > today
+              const isPast = !isFuture && !isTodayCell
+              const goalReached = isPast && count >= dailyGoal
+              const goalMissed = isPast && count > 0 && count < dailyGoal
               return (
                 <button
                   key={ci}
-                  className={`progress-day-cell${isSelected ? ' selected' : ''}${isTodayCell ? ' today' : ''}${isFuture ? ' future' : ''}`}
+                  className={`progress-day-cell${isSelected ? ' selected' : ''}${isTodayCell ? ' today' : ''}${isFuture ? ' future' : ''}${goalReached ? ' goal-reached' : ''}${goalMissed ? ' goal-missed' : ''}`}
                   onClick={() => !isFuture && setSelectedDay(day)}
                   disabled={isFuture}
                 >
@@ -150,24 +168,28 @@ export default function Progress() {
         ))}
       </div>
 
-      <div className="progress-day-detail">
-        <div className="progress-detail-header">
-          <span className="progress-detail-title">Day Progress</span>
-          <span className="progress-detail-date">{selectedDateStr}</span>
+      {selectedDay !== null && (
+        <div className="progress-day-detail">
+          <div className="progress-detail-header">
+            <span className="progress-detail-title">Day {Math.max(1, Math.floor((new Date(viewYear, viewMonth - 1, selectedDay).getTime() - (prefs.startedAt ?? Date.now())) / (1000 * 60 * 60 * 24)) + 1)} Progress</span>
+            <span className="progress-detail-date">{selectedDateStr}</span>
+          </div>
+          <div className="progress-detail-stats">
+            <span className="progress-detail-percentage">{selectedPercentage}%</span>
+            <span className="progress-detail-label">{selectedWords.length} out of {dailyGoal} words</span>
+          </div>
         </div>
-        <div className="progress-detail-stats">
-          <span className="progress-detail-percentage">{selectedPercentage}%</span>
-          <span className="progress-detail-label">{selectedWords.length} out of {dailyGoal} words</span>
-        </div>
-      </div>
+      )}
 
       <div className="progress-bottom-bar">
         <button
           className="progress-revise-btn"
           onClick={() => {
-            const allWords = monthData?.map((d) => d.word) ?? []
-            if (allWords.length > 0) {
-              const unique = [...new Set(allWords)]
+            const source = selectedDay !== null
+              ? selectedWords
+              : [...new Set((allWordsData ?? []).map((d) => d.word))]
+            if (source.length > 0) {
+              const unique = [...new Set(source)]
               const testWords = unique.sort(() => Math.random() - 0.5).slice(0, 20)
               localStorage.setItem('testWords', JSON.stringify(testWords))
               navigate('/test')

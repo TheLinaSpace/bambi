@@ -3,7 +3,7 @@
   width: 100%;
   min-height: 100svh;
   background: #fffbeb;
-  padding: 0 24px;
+  padding: 0 24px 160px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -142,6 +142,14 @@
   border-width: 3px;
 }
 
+.progress-day-cell.goal-reached {
+  background: #d3fdc5;
+}
+
+.progress-day-cell.goal-missed {
+  background: #ff7d7d;
+}
+
 .progress-day-cell.selected {
   background: #000;
   border-color: #c3b0e6;
@@ -224,10 +232,15 @@
 
 /* Bottom bar */
 .progress-bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
   width: 100%;
   max-width: 306px;
-  margin-top: 16px;
-  padding-bottom: 48px;
+  padding-bottom: 32px;
+  background: linear-gradient(transparent, #faf6ee 20%);
+  padding-top: 24px;
 }
 
 .progress-revise-btn {

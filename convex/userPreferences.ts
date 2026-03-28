@@ -11,13 +11,15 @@ export const get = query({
       .query("userPreferences")
       .withIndex("by_user", (q) => q.eq("userId", userId))
       .first();
+    const user = await ctx.db.get(userId);
+    const startedAt = user?._creationTime ?? Date.now();
     if (!prefs) {
-      return { selectedLanguage: "German", userLanguages: [], dailyGoal: 8, catLives: 9, catLivesDate: null };
+      return { selectedLanguage: "German", userLanguages: [], dailyGoal: 8, catLives: 9, catLivesDate: null, startedAt };
     }
     // Reset lives if it's a new day
     const today = new Date().toISOString().split("T")[0];
     const catLives = prefs.catLivesDate !== today ? 9 : (prefs.catLives ?? 9);
-    return { ...prefs, catLives, catLivesDate: prefs.catLivesDate ?? null };
+    return { ...prefs, catLives, catLivesDate: prefs.catLivesDate ?? null, startedAt };
   },
 });
 

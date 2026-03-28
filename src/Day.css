@@ -4,9 +4,11 @@
   min-height: 100svh;
   background: #fffbeb;
   padding: 0 24px;
+  padding-bottom: 160px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
 }
 
 /* Top bar */
@@ -568,11 +570,11 @@
   align-items: center;
   width: 100%;
   padding: 12px 20px;
+  font-family: 'Chilanka', 'Comic Sans MS', cursive, sans-serif;
   border: 1px solid #000;
   border-radius: 16px;
   background: #fffbeb;
   cursor: pointer;
-  font-family: 'Cheeky Rabbit', 'Comic Sans MS', cursive, sans-serif;
   font-size: 24px;
   color: #000;
   text-align: left;
