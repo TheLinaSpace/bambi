@@ -332,7 +332,7 @@
 /* Test Me button */
 .day-test-button {
   width: 100%;
-  height: 53px;
+  height: 64px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -893,4 +893,63 @@
   text-align: center;
   padding: 40px 0;
   margin: 0;
+}
+
+/* Sentences modal */
+.sentences-modal {
+  max-height: 80vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.sentences-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.sentence-card {
+  border: 1px solid #000;
+  border-radius: 16px;
+  padding: 16px;
+  background: #fffbeb;
+  box-shadow: 3px 3px 0px 0px #787878;
+}
+
+.sentence-text {
+  font-family: 'Chilanka', 'Comic Sans MS', cursive, sans-serif;
+  font-size: 18px;
+  color: #000;
+  margin: 0 0 6px;
+}
+
+.sentence-translation {
+  font-family: 'Chilanka', 'Comic Sans MS', cursive, sans-serif;
+  font-size: 14px;
+  color: #5f5f5f;
+  margin: 0 0 12px;
+}
+
+.sentence-new-words {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.sentence-word-btn {
+  font-family: 'Chilanka', 'Comic Sans MS', cursive, sans-serif;
+  font-size: 14px;
+  padding: 4px 12px;
+  border: 1px solid #000;
+  border-radius: 12px;
+  background: transparent;
+  color: #000;
+  cursor: pointer;
+}
+
+.sentence-word-btn.added {
+  background: #d3fdc5;
+  border-color: #d3fdc5;
+  cursor: default;
 }

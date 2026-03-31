@@ -183,6 +183,76 @@ ${args.language === "Lebanese Arabic" ? "- IMPORTANT: Use romanized/Latin alphab
   },
 });
 
+const sentencesSchema = {
+  type: "object" as const,
+  properties: {
+    sentences: {
+      type: "array" as const,
+      items: {
+        type: "object" as const,
+        properties: {
+          sentence: { type: "string" as const, description: "A sentence in the target language" },
+          translation: { type: "string" as const, description: "English translation" },
+          newWords: {
+            type: "array" as const,
+            items: { type: "string" as const },
+            description: "New words in the sentence that the user hasn't learned yet",
+          },
+        },
+        required: ["sentence", "translation", "newWords"],
+      },
+    },
+  },
+  required: ["sentences"],
+};
+
+export const generateSentences = action({
+  args: { knownWords: v.array(v.string()), language: v.string() },
+  handler: async (_ctx, args): Promise<
+    { sentence: string; translation: string; newWords: string[] }[]
+  > => {
+    const client = getClient();
+
+    const response = await client.chat.completions.create({
+      model: "google/gemini-2.0-flash-001",
+      response_format: {
+        type: "json_schema",
+        json_schema: {
+          name: "sentences",
+          strict: true,
+          schema: sentencesSchema,
+        },
+      },
+      messages: [
+        {
+          role: "system",
+          content: `You are a language learning assistant. Generate 5 sentences in ${args.language === "Lebanese Arabic" ? "Lebanese Arabic (romanized Latin alphabet, NOT Arabic script)" : args.language} that introduce new vocabulary the user hasn't learned yet.
+
+Rules:
+- Each sentence should contain 2-3 NEW words the user doesn't know yet.
+- Sentences should be things people ACTUALLY say in everyday life — common phrases, idioms, and expressions that native speakers use daily (e.g. ordering food, chatting with friends, giving opinions, making plans).
+- Aim for intermediate difficulty — not textbook-simple, but natural and real.
+- The new words should be practical, high-frequency vocabulary that natives use often.
+- Do NOT use any of these words the user already knows: ${args.knownWords.join(", ") || "(none)"}
+- Provide an English translation for each sentence.
+- List the new/unknown words in each sentence.
+${args.language === "Lebanese Arabic" ? "- Use romanized/Latin alphabet transliteration ONLY. Do NOT use Arabic script." : ""}`,
+        },
+        {
+          role: "user",
+          content: `Generate 5 sentences in ${args.language === "Lebanese Arabic" ? "Lebanese Arabic" : args.language} with new vocabulary for me to learn.`,
+        },
+      ],
+    });
+
+    const content = response.choices[0]?.message?.content;
+    if (!content) throw new Error("No response from AI");
+
+    const data = JSON.parse(content);
+    return data.sentences || [];
+  },
+});
+
 const quizSchema = {
   type: "object" as const,
   properties: {

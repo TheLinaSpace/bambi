@@ -55,6 +55,9 @@ export default function Day() {
   const [selectedScanned, setSelectedScanned] = useState<Set<string>>(new Set())
   const [showScanModal, setShowScanModal] = useState(false)
   const [scanning, setScanning] = useState(false)
+  const [showSentences, setShowSentences] = useState(false)
+  const [sentences, setSentences] = useState<{ sentence: string; translation: string; newWords: string[] }[]>([])
+  const [generatingSentences, setGeneratingSentences] = useState(false)
   const [showCelebration, setShowCelebration] = useState(false)
   const [goalCelebrated, setGoalCelebrated] = useState(() => {
     return localStorage.getItem('goalCelebratedDate') === new Date().toISOString().split('T')[0]
@@ -93,6 +96,7 @@ export default function Day() {
 
   const generateWordDetails = useAction(api.wordActions.generateWordDetails)
   const scanWordsFromImage = useAction(api.wordActions.scanWordsFromImage)
+  const generateSentences = useAction(api.wordActions.generateSentences)
 
   const compressImage = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -299,12 +303,23 @@ export default function Day() {
       />
 
       <div className="day-bottom-bar">
-        {words.length >= dailyGoal && (
+        {words.length >= dailyGoal ? (
           <button className="day-test-button" onClick={() => {
             localStorage.setItem('testWords', JSON.stringify(words))
             navigate('/test')
           }}>
             Test Me
+          </button>
+        ) : (
+          <button className="day-test-button" onClick={() => {
+            setGeneratingSentences(true)
+            setShowSentences(true)
+            generateSentences({ knownWords: words, language: selectedLanguage })
+              .then((result) => setSentences(result))
+              .catch(() => setSentences([]))
+              .finally(() => setGeneratingSentences(false))
+          }}>
+            Inspire Me
           </button>
         )}
         <div className="day-action-buttons">
@@ -501,6 +516,63 @@ export default function Day() {
               }}
             >
               Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {showSentences && (
+        <div className="day-modal-overlay" onClick={() => { setShowSentences(false); setSentences([]); }}>
+          <div className="day-modal sentences-modal" onClick={(e) => e.stopPropagation()}>
+            <h2 className="day-modal-title">Inspire Me</h2>
+            {generatingSentences ? (
+              <p className="scan-loading">Generating sentences...</p>
+            ) : sentences.length === 0 ? (
+              <p className="scan-loading">No sentences generated. Try again.</p>
+            ) : (
+              <div className="sentences-list">
+                {sentences.map((s, i) => (
+                  <div key={i} className="sentence-card">
+                    <p className="sentence-text">{s.sentence}</p>
+                    <p className="sentence-translation">{s.translation}</p>
+                    <div className="sentence-new-words">
+                      <button
+                        className={`sentence-word-btn sentence-add-btn${words.includes(s.sentence) ? ' added' : ''}`}
+                        onClick={() => {
+                          if (words.includes(s.sentence)) {
+                            removeWord({ word: s.sentence, language: selectedLanguage, date: todayStr })
+                          } else {
+                            addWord({ word: s.sentence, language: selectedLanguage, date: todayStr })
+                          }
+                        }}
+                      >
+                        {words.includes(s.sentence) ? '✓ sentence' : '+ sentence'}
+                      </button>
+                      {s.newWords.map((w) => (
+                        <button
+                          key={w}
+                          className={`sentence-word-btn${words.includes(w) ? ' added' : ''}`}
+                          onClick={() => {
+                            if (words.includes(w)) {
+                              removeWord({ word: w, language: selectedLanguage, date: todayStr })
+                            } else {
+                              addWord({ word: w, language: selectedLanguage, date: todayStr })
+                            }
+                          }}
+                        >
+                          {words.includes(w) ? `✓ ${w}` : `+ ${w}`}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            <button
+              className="day-modal-cancel"
+              onClick={() => { setShowSentences(false); setSentences([]); }}
+            >
+              Close
             </button>
           </div>
         </div>
