@@ -53,6 +53,12 @@ const scanResultSchema = {
   required: ["words"],
 };
 
+function parseJSON(text: string) {
+  // Strip markdown code blocks if present
+  const cleaned = text.replace(/^```(?:json)?\s*\n?/i, '').replace(/\n?```\s*$/i, '').trim();
+  return JSON.parse(cleaned);
+}
+
 function getClient() {
   return new OpenAI({
     baseURL: "https://openrouter.ai/api/v1",
@@ -131,27 +137,30 @@ export const generateWordDetails = action({
 
     const client = getClient();
 
+    const isLebanese = args.language === "Lebanese Arabic";
+    const model = isLebanese ? "anthropic/claude-sonnet-4" : "google/gemini-2.0-flash-001";
+
     const response = await client.chat.completions.create({
-      model: "google/gemini-2.0-flash-001",
-      response_format: {
-        type: "json_schema",
-        json_schema: {
-          name: "word_details",
-          strict: true,
-          schema: wordDetailsSchema,
-        },
-      },
+      model,
+      ...(isLebanese ? {} : { response_format: { type: "json_schema" as const, json_schema: { name: "word_details", strict: true, schema: wordDetailsSchema } } }),
       messages: [
         {
           role: "system",
-          content: `You are a language learning assistant. Given a word in ${args.language === "Lebanese Arabic" ? "Lebanese Arabic (spoken dialect)" : args.language}, provide detailed information about it.
+          content: `You are a language learning assistant. Given a word in ${isLebanese ? "Lebanese Arabic (spoken dialect)" : args.language}, provide detailed information about it.
 
 Rules:
 - "conjugation" should only be populated if the word is a verb. For nouns/adjectives, return an empty array.
 - "prepositions" should list common prepositions used with this word. If none, return an empty array.
 - Use the conventions of ${args.language === "Lebanese Arabic" ? "Lebanese Arabic" : args.language} for pronouns and grammatical terms.
 - The example sentence should be natural and useful for a learner.
-${args.language === "Lebanese Arabic" ? "- IMPORTANT: Use romanized/Latin alphabet transliteration for ALL Arabic text (e.g. \"kifak\" not \"كيفك\", \"shu\" not \"شو\"). Do NOT use Arabic script anywhere.\n- Use Lebanese dialect, NOT Modern Standard Arabic (e.g. \"shu\" instead of \"matha\", \"kifak\" instead of \"kayfa haluk\")." : ""}`,
+${args.language === "Lebanese Arabic" ? `- IMPORTANT: Use romanized/Latin alphabet transliteration for ALL Arabic text (e.g. "kifak" not "كيفك", "shu" not "شو"). Do NOT use Arabic script anywhere.
+- You MUST use REAL Lebanese spoken dialect, NOT Modern Standard Arabic or formal Arabic.
+- Examples: "bayye" not "abi", "emme" not "ummi", "jawze" not "jozeti", "hayda" not "hatha", "ktir" not "kathir", "halla2" not "al-aan", "wen" not "ayna", "shu" not "matha", "baddak" not "turid".
+- Use Lebanese possessive forms as people actually say them (e.g. "baye", "akhte", "siyyarte").` : ""}
+
+Respond ONLY with a JSON object in this exact format:
+{"translation": "English translation", "type": "word type", "example": "example sentence", "conjugation": [{"pronoun": "...", "present": "...", "past": "..."}], "prepositions": [{"name": "...", "explanation": "...", "example": "..."}]}
+For conjugation and prepositions, use empty arrays [] if not applicable.`,
         },
         {
           role: "user",
@@ -165,7 +174,7 @@ ${args.language === "Lebanese Arabic" ? "- IMPORTANT: Use romanized/Latin alphab
       throw new Error("No response from AI");
     }
 
-    const data = JSON.parse(content);
+    const data = parseJSON(content);
 
     const wordData = {
       word: args.word,
@@ -213,30 +222,60 @@ export const generateSentences = action({
   > => {
     const client = getClient();
 
+    const isLebanese = args.language === "Lebanese Arabic";
+    const model = isLebanese ? "anthropic/claude-sonnet-4" : "google/gemini-2.0-flash-001";
+
     const response = await client.chat.completions.create({
-      model: "google/gemini-2.0-flash-001",
-      response_format: {
-        type: "json_schema",
-        json_schema: {
-          name: "sentences",
-          strict: true,
-          schema: sentencesSchema,
-        },
-      },
+      model,
+      ...(isLebanese ? {} : { response_format: { type: "json_schema" as const, json_schema: { name: "sentences", strict: true, schema: sentencesSchema } } }),
       messages: [
         {
           role: "system",
-          content: `You are a language learning assistant. Generate 5 sentences in ${args.language === "Lebanese Arabic" ? "Lebanese Arabic (romanized Latin alphabet, NOT Arabic script)" : args.language} that introduce new vocabulary the user hasn't learned yet.
+          content: `You are a language learning assistant. Generate 5 sentences in ${isLebanese ? "Lebanese Arabic (romanized Latin alphabet, NOT Arabic script)" : args.language} that introduce new vocabulary the user hasn't learned yet.
 
 Rules:
-- Each sentence should contain 2-3 NEW words the user doesn't know yet.
+${args.language === "Lebanese Arabic" ? `- Keep sentences SHORT and SIMPLE — 3 to 5 words max.
+- Each sentence should contain 1-2 NEW words the user doesn't know yet.
+- Use basic, everyday Lebanese dialect — the kind of thing you'd say to a friend, at a shop, or at home.
+- Think beginner-friendly: greetings, food, family, directions, feelings, daily routines.
+- Use romanized/Latin alphabet transliteration ONLY. Do NOT use Arabic script.
+- You MUST use REAL Lebanese spoken dialect, NOT Modern Standard Arabic or formal Arabic. This is critical.
+- Examples of CORRECT Lebanese vs WRONG MSA/formal:
+  - "jawze" NOT "jozeti" (my husband)
+  - "bayye" NOT "abi" (my father)
+  - "emme" NOT "ummi" (my mother)
+  - "shu baddak?" NOT "matha turid?" (what do you want?)
+  - "wen rayeh?" NOT "ayna tadhab?" (where are you going?)
+  - "hayda" NOT "hatha" (this)
+  - "halla2" NOT "al-aan" (now)
+  - "ktir" NOT "kathir" (very/a lot)
+  - "ma baaref" NOT "la aarif" (I don't know)
+  - "kifak" NOT "kayfa haluk" (how are you)
+- Use the possessive suffixes as Lebanese people actually say them (e.g. "baye" not "abi", "akhte" not "ukhti").
+- Use Lebanese vocabulary, NOT MSA vocabulary. Common examples:
+  - "2anine" NOT "zumeta" or "zujaja" (bottle)
+  - "jeebile" NOT "aatini" (bring me / give me)
+  - "tawle" NOT "ta2wila" (table)
+  - "berrad" NOT "ibreeq" (kettle/teapot)
+  - "sa7en" NOT "tabaq" (plate)
+  - "me2laye" NOT "mil3aqa" (spoon)
+  - "shawke" NOT "shawka" (fork)
+  - "sekkine" NOT "sikkeen" (knife)
+  - "kezzbe" NOT "kidhba" (lie)
+  - "bass" NOT "lakin" or "faqat" (but / only)
+  - "hek" NOT "hakatha" (like this)
+  - "yalla" (let's go / come on)
+  - "3a" NOT "ila" (to/on)
+- If you're unsure of the Lebanese word, use the simplest spoken form, never the formal/written Arabic version.` : `- Each sentence should contain 2-3 NEW words the user doesn't know yet.
 - Sentences should be things people ACTUALLY say in everyday life — common phrases, idioms, and expressions that native speakers use daily (e.g. ordering food, chatting with friends, giving opinions, making plans).
 - Aim for intermediate difficulty — not textbook-simple, but natural and real.
-- The new words should be practical, high-frequency vocabulary that natives use often.
+- The new words should be practical, high-frequency vocabulary that natives use often.`}
 - Do NOT use any of these words the user already knows: ${args.knownWords.join(", ") || "(none)"}
 - Provide an English translation for each sentence.
 - List the new/unknown words in each sentence.
-${args.language === "Lebanese Arabic" ? "- Use romanized/Latin alphabet transliteration ONLY. Do NOT use Arabic script." : ""}`,
+
+Respond ONLY with a JSON object in this exact format:
+{"sentences": [{"sentence": "...", "translation": "...", "newWords": ["word1", "word2"]}]}`,
         },
         {
           role: "user",
@@ -248,7 +287,7 @@ ${args.language === "Lebanese Arabic" ? "- Use romanized/Latin alphabet translit
     const content = response.choices[0]?.message?.content;
     if (!content) throw new Error("No response from AI");
 
-    const data = JSON.parse(content);
+    const data = parseJSON(content);
     return data.sentences || [];
   },
 });

@@ -1,3 +1,15 @@
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
 .day-page {
   position: relative;
   width: 100%;
@@ -44,6 +56,10 @@
 }
 
 .day-menu-dropdown {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
   width: 100%;
   background: #fffbeb;
   border-radius: 16px 16px 0 0;
@@ -52,6 +68,7 @@
   flex-direction: column;
   gap: 12px;
   animation: menuSlideUp 0.25s ease-out;
+  z-index: 51;
 }
 
 @keyframes menuSlideUp {
@@ -105,6 +122,10 @@
 }
 
 .day-lang-dropdown {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
   width: 100%;
   background: #fffbeb;
   border-radius: 16px 16px 0 0;
@@ -113,6 +134,7 @@
   flex-direction: column;
   gap: 8px;
   animation: menuSlideUp 0.25s ease-out;
+  z-index: 51;
 }
 
 .day-lang-option {
@@ -134,6 +156,17 @@
 .day-lang-option.active {
   background: #000;
   color: #fff;
+}
+
+.day-lang-add {
+  border-top: 1px solid #e0e0e0;
+  color: #5f5f5f;
+}
+
+.day-lang-add-icon {
+  font-size: 20px;
+  width: 24px;
+  text-align: center;
 }
 
 .day-lang-option-flag {
@@ -372,21 +405,22 @@
   inset: 0;
   background: rgba(0, 0, 0, 0.43);
   z-index: 300;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
   animation: fadeIn 0.2s ease-out;
 }
 
 .celebration-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   background: #fffbeb;
   border: 1px solid #000;
   border-radius: 16px;
   box-shadow: 4px 5px 0px 0px #787878;
-  width: 100%;
+  width: calc(100% - 48px);
   max-width: 344px;
   padding: 32px 24px 12px;
+  z-index: 301;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -479,18 +513,20 @@
   inset: 0;
   background: rgba(0, 0, 0, 0.33);
   z-index: 100;
-  display: flex;
-  align-items: flex-end;
 }
 
 /* Modal */
 .day-modal {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
   width: 100%;
   max-width: 430px;
-  margin: 0 auto;
   background: #fffbeb;
   padding: 48px 24px max(40px, env(safe-area-inset-bottom));
   box-sizing: border-box;
+  z-index: 101;
 }
 
 .day-modal-title {
@@ -635,9 +671,6 @@
   inset: 0;
   background: rgba(0, 0, 0, 0.43);
   z-index: 200;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
   animation: fadeIn 0.2s ease-out;
 }
 
@@ -647,9 +680,16 @@
 }
 
 .word-detail-modal {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 430px;
   display: flex;
   flex-direction: column;
   max-height: 90vh;
+  z-index: 201;
   max-width: 100%;
   width: 100%;
   margin: 0 auto;

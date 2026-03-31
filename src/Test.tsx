@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAction, useQuery, useMutation } from 'convex/react'
 import { api } from '../convex/_generated/api'
+import * as RadioGroup from '@radix-ui/react-radio-group'
 import './Test.css'
 
 interface Question {
@@ -184,7 +185,12 @@ export default function Test() {
             <span>{currentQuestion.word}</span>
           </div>
 
-          <div className="test-options">
+          <RadioGroup.Root
+            className="test-options"
+            value={selectedAnswer ?? undefined}
+            onValueChange={setSelectedAnswer}
+            disabled={submitted}
+          >
             {currentQuestion.options.map((option) => {
               let cls = 'test-option'
               if (submitted) {
@@ -199,23 +205,23 @@ export default function Test() {
                 cls += ' selected'
               }
               return (
-                <button
-                  key={option}
-                  className={cls}
-                  onClick={() => !submitted && setSelectedAnswer(option)}
-                  disabled={submitted}
-                >
-                  {submitted && option === currentQuestion.correctAnswer && (
-                    <span className="test-option-icon">✓</span>
-                  )}
-                  {submitted && option !== currentQuestion.correctAnswer && (
-                    <span className="test-option-icon">✕</span>
-                  )}
-                  {option}
-                </button>
+                <RadioGroup.Item key={option} value={option} asChild>
+                  <button
+                    className={cls}
+                    disabled={submitted}
+                  >
+                    {submitted && option === currentQuestion.correctAnswer && (
+                      <span className="test-option-icon">✓</span>
+                    )}
+                    {submitted && option !== currentQuestion.correctAnswer && (
+                      <span className="test-option-icon">✕</span>
+                    )}
+                    {option}
+                  </button>
+                </RadioGroup.Item>
               )
             })}
-          </div>
+          </RadioGroup.Root>
 
           {submitted && (
             <div className="test-feedback">

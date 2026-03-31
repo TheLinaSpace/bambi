@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation } from 'convex/react'
 import { api } from '../convex/_generated/api'
+
+import * as Dialog from '@radix-ui/react-dialog'
 import './Progress.css'
 import { useUserPreferences } from './useUserPreferences'
 
@@ -30,6 +32,7 @@ export default function Progress() {
   const setGoalMutation = useMutation(api.userPreferences.setGoal)
   const selectedLanguage = prefs.selectedLanguage
   const flagSrc = languageFlags[selectedLanguage] || '/assets/flag-gb.png'
+  const [showMenu, setShowMenu] = useState(false)
   const [dailyGoal, setDailyGoal] = useState(prefs.dailyGoal)
   const [showGoalModal, setShowGoalModal] = useState(false)
   const [goalInput, setGoalInput] = useState('')
@@ -97,8 +100,6 @@ export default function Progress() {
   for (let i = 0; i < cells.length; i += 7) {
     rows.push(cells.slice(i, i + 7))
   }
-
-  const [showMenu, setShowMenu] = useState(false)
 
   return (
     <div className="progress-page">
@@ -209,10 +210,11 @@ export default function Progress() {
         </button>
       </div>
 
-      {showGoalModal && (
-        <div className="progress-goal-overlay" onClick={() => setShowGoalModal(false)}>
-          <div className="progress-goal-modal" onClick={(e) => e.stopPropagation()}>
-            <h2 className="progress-goal-modal-title">Update Daily Goal</h2>
+      <Dialog.Root open={showGoalModal} onOpenChange={setShowGoalModal}>
+        <Dialog.Portal>
+          <Dialog.Overlay className="progress-goal-overlay" />
+          <Dialog.Content className="progress-goal-modal">
+            <Dialog.Title className="progress-goal-modal-title">Update Daily Goal</Dialog.Title>
             <input
               className="progress-goal-input"
               type="number"
@@ -240,9 +242,9 @@ export default function Progress() {
             >
               Cancel
             </button>
-          </div>
-        </div>
-      )}
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
     </div>
   )
 }

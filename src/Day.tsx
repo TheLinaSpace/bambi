@@ -4,6 +4,10 @@ import { useAction, useQuery, useMutation } from 'convex/react'
 import { api } from '../convex/_generated/api'
 import './Day.css'
 import { useUserPreferences } from './useUserPreferences'
+import * as Dialog from '@radix-ui/react-dialog'
+
+import * as Progress from '@radix-ui/react-progress'
+import * as Toggle from '@radix-ui/react-toggle'
 
 interface WordDetails {
   word: string
@@ -62,9 +66,9 @@ export default function Day() {
   const [goalCelebrated, setGoalCelebrated] = useState(() => {
     return localStorage.getItem('goalCelebratedDate') === new Date().toISOString().split('T')[0]
   })
+  const [showLangPicker, setShowLangPicker] = useState(false)
   const cameraInputRef = useRef<HTMLInputElement>(null)
   const uploadInputRef = useRef<HTMLInputElement>(null)
-  const [showLangPicker, setShowLangPicker] = useState(false)
   const prefs = useUserPreferences()
   const [selectedLanguage, setSelectedLanguage] = useState(prefs.selectedLanguage)
   const setLanguage = useMutation(api.userPreferences.setLanguage)
@@ -215,6 +219,16 @@ export default function Day() {
                   <span>{lang}</span>
                 </button>
               ))}
+              <button
+                className="day-lang-option day-lang-add"
+                onClick={() => {
+                  setShowLangPicker(false)
+                  navigate('/select-language')
+                }}
+              >
+                <span className="day-lang-add-icon">+</span>
+                <span>Add Language</span>
+              </button>
             </div>
           </div>
         )}
@@ -227,9 +241,9 @@ export default function Day() {
       <p className="day-date">{dateStr}</p>
 
       <div className="day-progress-row">
-        <div className="day-progress-bar">
-          <div className="day-progress-fill" style={{ width: `${Math.min((words.length / dailyGoal) * 100, 100)}%` }} />
-        </div>
+        <Progress.Root className="day-progress-bar" value={Math.min((words.length / dailyGoal) * 100, 100)}>
+          <Progress.Indicator className="day-progress-fill" style={{ width: `${Math.min((words.length / dailyGoal) * 100, 100)}%` }} />
+        </Progress.Root>
         <span className="day-progress-text">{words.length} / {dailyGoal}</span>
       </div>
 
@@ -335,11 +349,14 @@ export default function Day() {
         </div>
       </div>
 
-      {selectedWordIndex !== null && selectedWord && (
-        <div className="word-detail-overlay" onClick={() => setSelectedWordIndex(null)}>
-          <div className="word-detail-modal" onClick={(e) => e.stopPropagation()}>
+      {/* Word Details Modal */}
+      <Dialog.Root open={selectedWordIndex !== null && !!selectedWord} onOpenChange={(open) => { if (!open) setSelectedWordIndex(null) }}>
+        <Dialog.Portal>
+          <Dialog.Overlay className="word-detail-overlay" />
+          <Dialog.Content className="word-detail-modal">
+            <Dialog.Title className="sr-only">Word Details</Dialog.Title>
             {prevWord && (
-              <div className="word-detail-prev" onClick={() => { setSlideDirection('down'); setSelectedWordIndex(selectedWordIndex - 1); }}>
+              <div className="word-detail-prev" onClick={() => { setSlideDirection('down'); setSelectedWordIndex(selectedWordIndex! - 1); }}>
                 <h2 className="word-detail-prev-text">{prevWord}</h2>
               </div>
             )}
@@ -408,18 +425,20 @@ export default function Day() {
               )}
             </div>
             {nextWord && (
-              <div className="word-detail-next" onClick={() => { setSlideDirection('up'); setSelectedWordIndex(selectedWordIndex + 1); }}>
+              <div className="word-detail-next" onClick={() => { setSlideDirection('up'); setSelectedWordIndex(selectedWordIndex! + 1); }}>
                 <h2 className="word-detail-next-text">{nextWord}</h2>
               </div>
             )}
-          </div>
-        </div>
-      )}
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
 
-      {showScanModal && (
-        <div className="day-modal-overlay" onClick={() => { setShowScanModal(false); setScannedWords([]); }}>
-          <div className="day-modal" onClick={(e) => e.stopPropagation()}>
-            <h2 className="day-modal-title">Words Found</h2>
+      {/* Scan Results Modal */}
+      <Dialog.Root open={showScanModal} onOpenChange={(open) => { if (!open) { setShowScanModal(false); setScannedWords([]); } }}>
+        <Dialog.Portal>
+          <Dialog.Overlay className="day-modal-overlay" />
+          <Dialog.Content className="day-modal">
+            <Dialog.Title className="day-modal-title">Words Found</Dialog.Title>
             {scanning ? (
               <p className="scan-loading">Scanning image...</p>
             ) : scannedWords.length === 0 ? (
@@ -467,29 +486,36 @@ export default function Day() {
             >
               Cancel
             </button>
-          </div>
-        </div>
-      )}
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
 
-      {showCelebration && (
-        <div className="celebration-overlay" onClick={() => setShowCelebration(false)}>
-          <div className="celebration-modal" onClick={(e) => e.stopPropagation()}>
+      {/* Celebration Modal */}
+      <Dialog.Root open={showCelebration} onOpenChange={(open) => { if (!open) setShowCelebration(false) }}>
+        <Dialog.Portal>
+          <Dialog.Overlay className="celebration-overlay" />
+          <Dialog.Content className="celebration-modal">
+            <Dialog.Title className="sr-only">Celebration</Dialog.Title>
             <div className="celebration-close-row">
-              <button className="celebration-close" onClick={() => setShowCelebration(false)}>✕</button>
+              <Dialog.Close asChild>
+                <button className="celebration-close">✕</button>
+              </Dialog.Close>
             </div>
             <h2 className="celebration-title">YAY! You reached your Word Goal</h2>
             <div className="celebration-illustration">
               <img alt="" src="/assets/bambi-tank.png" />
             </div>
             <p className="celebration-caption">Cat filled the word tank</p>
-          </div>
-        </div>
-      )}
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
 
-      {showModal && (
-        <div className="day-modal-overlay" onClick={() => setShowModal(false)}>
-          <div className="day-modal" onClick={(e) => e.stopPropagation()}>
-            <h2 className="day-modal-title">Add a word you Learned Today</h2>
+      {/* Add Word Modal */}
+      <Dialog.Root open={showModal} onOpenChange={(open) => { if (!open) { setWord(''); setShowModal(false); } }}>
+        <Dialog.Portal>
+          <Dialog.Overlay className="day-modal-overlay" />
+          <Dialog.Content className="day-modal">
+            <Dialog.Title className="day-modal-title">Add a word you Learned Today</Dialog.Title>
             <input
               className="day-modal-input"
               type="text"
@@ -517,14 +543,16 @@ export default function Day() {
             >
               Cancel
             </button>
-          </div>
-        </div>
-      )}
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
 
-      {showSentences && (
-        <div className="day-modal-overlay" onClick={() => { setShowSentences(false); setSentences([]); }}>
-          <div className="day-modal sentences-modal" onClick={(e) => e.stopPropagation()}>
-            <h2 className="day-modal-title">Inspire Me</h2>
+      {/* Sentences Modal */}
+      <Dialog.Root open={showSentences} onOpenChange={(open) => { if (!open) { setShowSentences(false); setSentences([]); } }}>
+        <Dialog.Portal>
+          <Dialog.Overlay className="day-modal-overlay" />
+          <Dialog.Content className="day-modal sentences-modal">
+            <Dialog.Title className="day-modal-title">Inspire Me</Dialog.Title>
             {generatingSentences ? (
               <p className="scan-loading">Generating sentences...</p>
             ) : sentences.length === 0 ? (
@@ -536,10 +564,11 @@ export default function Day() {
                     <p className="sentence-text">{s.sentence}</p>
                     <p className="sentence-translation">{s.translation}</p>
                     <div className="sentence-new-words">
-                      <button
+                      <Toggle.Root
                         className={`sentence-word-btn sentence-add-btn${words.includes(s.sentence) ? ' added' : ''}`}
-                        onClick={() => {
-                          if (words.includes(s.sentence)) {
+                        pressed={words.includes(s.sentence)}
+                        onPressedChange={(pressed) => {
+                          if (!pressed) {
                             removeWord({ word: s.sentence, language: selectedLanguage, date: todayStr })
                           } else {
                             addWord({ word: s.sentence, language: selectedLanguage, date: todayStr })
@@ -547,13 +576,14 @@ export default function Day() {
                         }}
                       >
                         {words.includes(s.sentence) ? '✓ sentence' : '+ sentence'}
-                      </button>
+                      </Toggle.Root>
                       {s.newWords.map((w) => (
-                        <button
+                        <Toggle.Root
                           key={w}
                           className={`sentence-word-btn${words.includes(w) ? ' added' : ''}`}
-                          onClick={() => {
-                            if (words.includes(w)) {
+                          pressed={words.includes(w)}
+                          onPressedChange={(pressed) => {
+                            if (!pressed) {
                               removeWord({ word: w, language: selectedLanguage, date: todayStr })
                             } else {
                               addWord({ word: w, language: selectedLanguage, date: todayStr })
@@ -561,7 +591,7 @@ export default function Day() {
                           }}
                         >
                           {words.includes(w) ? `✓ ${w}` : `+ ${w}`}
-                        </button>
+                        </Toggle.Root>
                       ))}
                     </div>
                   </div>
@@ -572,11 +602,11 @@ export default function Day() {
               className="day-modal-cancel"
               onClick={() => { setShowSentences(false); setSentences([]); }}
             >
-              Close
+              Apply
             </button>
-          </div>
-        </div>
-      )}
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
     </div>
   )
 }

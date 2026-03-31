@@ -309,15 +309,19 @@
   inset: 0;
   background: rgba(0, 0, 0, 0.33);
   z-index: 100;
-  display: flex;
-  align-items: flex-end;
 }
 
 .progress-goal-modal {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
   width: 100%;
+  max-width: 430px;
   background: #fffbeb;
   padding: 48px 24px max(40px, env(safe-area-inset-bottom));
   box-sizing: border-box;
+  z-index: 101;
 }
 
 .progress-goal-modal-title {
