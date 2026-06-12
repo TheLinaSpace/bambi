@@ -72,7 +72,7 @@ export const scanWordsFromImage = action({
     const client = getClient();
 
     const response = await client.chat.completions.create({
-      model: "google/gemini-2.0-flash-001",
+      model: "google/gemini-2.5-flash",
       response_format: {
         type: "json_schema",
         json_schema: {
@@ -138,7 +138,7 @@ export const generateWordDetails = action({
     const client = getClient();
 
     const isLebanese = args.language === "Lebanese Arabic";
-    const model = isLebanese ? "anthropic/claude-sonnet-4" : "google/gemini-2.0-flash-001";
+    const model = isLebanese ? "anthropic/claude-sonnet-4" : "google/gemini-2.5-flash";
 
     const response = await client.chat.completions.create({
       model,
@@ -223,7 +223,7 @@ export const generateSentences = action({
     const client = getClient();
 
     const isLebanese = args.language === "Lebanese Arabic";
-    const model = isLebanese ? "anthropic/claude-sonnet-4" : "google/gemini-2.0-flash-001";
+    const model = isLebanese ? "anthropic/claude-sonnet-4" : "google/gemini-2.5-flash";
 
     const response = await client.chat.completions.create({
       model,
@@ -322,7 +322,7 @@ export const generateQuiz = action({
     const client = getClient();
 
     const response = await client.chat.completions.create({
-      model: "google/gemini-2.0-flash-001",
+      model: "google/gemini-2.5-flash",
       response_format: {
         type: "json_schema",
         json_schema: {
